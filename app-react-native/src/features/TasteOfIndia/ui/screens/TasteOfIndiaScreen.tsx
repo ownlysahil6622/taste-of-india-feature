@@ -20,6 +20,8 @@ import Animated, {
 import { TASTE_OF_INDIA_EASING } from '../../animation';
 import {
   TASTE_OF_INDIA_COLORS,
+  TASTE_OF_INDIA_DESIGN_HEIGHT,
+  TASTE_OF_INDIA_DESIGN_WIDTH,
   TASTE_OF_INDIA_SCENE_PAD_X,
   TASTE_OF_INDIA_SCENE_PAD_Y,
   TASTE_OF_INDIA_MAP_CENTER_OFFSET,
@@ -49,6 +51,12 @@ export const TasteOfIndiaScreen = () => {
     height: window.height,
   });
   const [obstruction, setObstruction] = useState(0);
+  const [tipHeight, setTipHeight] = useState(0);
+  const handleTipHeightChange = useCallback((height: number) => {
+    setObstruction(height);
+    setTipHeight(height);
+  }, []);
+  const hasPositionedSceneRef = useRef(false);
   const sceneScale = useSharedValue(1);
   const sceneTranslateX = useSharedValue(0);
   const sceneTranslateY = useSharedValue(0);
@@ -87,15 +95,26 @@ export const TasteOfIndiaScreen = () => {
       width: size.width,
       height: size.height,
       obstruction,
+      tipHeight,
+      headerHeight,
       anchor: selectedState?.markerAnchor ?? null,
     });
     const timing = {
       duration: TASTE_OF_INDIA_SCENE_DURATION_MS,
       easing: TASTE_OF_INDIA_EASING,
     };
-    sceneScale.value = withTiming(target.scale, timing);
-    sceneTranslateX.value = withTiming(target.translateX, timing);
-    sceneTranslateY.value = withTiming(target.translateY, timing);
+    if (hasPositionedSceneRef.current) {
+      sceneScale.value = withTiming(target.scale, timing);
+      sceneTranslateX.value = withTiming(target.translateX, timing);
+      sceneTranslateY.value = withTiming(target.translateY, timing);
+    } else {
+      // Until the bottom panel is measured, place the fitted map without
+      // animating (avoids a zoom-in from 1x when the screen opens).
+      hasPositionedSceneRef.current = tipHeight > 0 || selectedState != null;
+      sceneScale.value = target.scale;
+      sceneTranslateX.value = target.translateX;
+      sceneTranslateY.value = target.translateY;
+    }
     panBounds.value = computeMapPanBounds({
       width: size.width,
       height: size.height,
@@ -111,6 +130,7 @@ export const TasteOfIndiaScreen = () => {
   }, [
     selectedState,
     obstruction,
+    tipHeight,
     size.width,
     size.height,
     sceneScale,
@@ -186,7 +206,10 @@ export const TasteOfIndiaScreen = () => {
             pointerEvents="box-none"
             style={[
               styles.sceneContent,
-              { width: size.width, height: size.height },
+              {
+                width: TASTE_OF_INDIA_DESIGN_WIDTH,
+                height: TASTE_OF_INDIA_DESIGN_HEIGHT,
+              },
             ]}
           >
             <View pointerEvents="none" style={StyleSheet.absoluteFill}>
@@ -195,7 +218,7 @@ export const TasteOfIndiaScreen = () => {
                   styles.map,
                   {
                     left:
-                      size.width / 2 +
+                      TASTE_OF_INDIA_DESIGN_WIDTH / 2 +
                       TASTE_OF_INDIA_MAP_CENTER_OFFSET -
                       TASTE_OF_INDIA_MAP_SIZE / 2,
                   },
@@ -222,7 +245,7 @@ export const TasteOfIndiaScreen = () => {
             </View>
             <TasteOfIndiaHitAreas
               states={state.states}
-              containerWidth={size.width}
+              containerWidth={TASTE_OF_INDIA_DESIGN_WIDTH}
               onSelectState={handleSelectState}
             />
           </View>
@@ -235,7 +258,9 @@ export const TasteOfIndiaScreen = () => {
         }
       />
       {selectedState ? null : (
-        <TasteOfIndiaDiscoveryTip onHeightChange={setObstruction} />
+        <TasteOfIndiaDiscoveryTip
+          onHeightChange={handleTipHeightChange}
+        />
       )}
       {selectedState ? (
         <TasteOfIndiaStateSheet

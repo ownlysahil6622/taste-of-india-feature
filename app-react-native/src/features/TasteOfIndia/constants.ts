@@ -51,14 +51,25 @@ export const TASTE_OF_INDIA_MAP_SIZE = 461;
 export const TASTE_OF_INDIA_MAP_TOP = 182;
 export const TASTE_OF_INDIA_MAP_CENTER_OFFSET = 14.5;
 
-// Lowered from 1.05 so every marker + label fits a 390pt screen with
-// TASTE_OF_INDIA_FOCUS_CONTENT_EDGE_MARGIN on both sides.
+// The map, markers, labels and hit areas sit on one stage in design-frame
+// coordinates (DESIGN_WIDTH x DESIGN_HEIGHT). The stage is translated and
+// scaled so the content fits between the header and the bottom panel.
+// Pixel bounds of the visible content on the stage (India artwork incl. the
+// North-East, plus every marker and label), measured from the artwork.
+export const TASTE_OF_INDIA_CONTENT_BOUNDS = {
+  left: 5,
+  right: 415,
+  top: 192,
+  bottom: 636,
+} as const;
+// Horizontal span of the markers + labels only (Maharashtra to West Bengal).
+export const TASTE_OF_INDIA_LABEL_BOUNDS = { left: 14, right: 376 } as const;
+export const TASTE_OF_INDIA_FIT_MARGIN_X = 16;
+export const TASTE_OF_INDIA_FIT_GAP_Y = 12;
+export const TASTE_OF_INDIA_MAX_FIT_SCALE = 1.6;
+// Selected-state zoom, multiplied on top of the fit scale (capped so no
+// label is clipped at the side margins).
 export const TASTE_OF_INDIA_FOCUS_SCALE = 1.03;
-// Horizontal span of all markers + labels on the 390pt design frame
-// (Maharashtra label on the left, West Bengal label on the right).
-export const TASTE_OF_INDIA_FOCUS_CONTENT_LEFT = 13;
-export const TASTE_OF_INDIA_FOCUS_CONTENT_RIGHT = 376;
-export const TASTE_OF_INDIA_FOCUS_CONTENT_EDGE_MARGIN = 8;
 export const TASTE_OF_INDIA_FOCUS_BOTTOM_GAP = 96;
 export const TASTE_OF_INDIA_PAN_EDGE_MARGIN = 100;
 export const TASTE_OF_INDIA_MAX_VERTICAL_DRAG = 80;
@@ -98,7 +109,6 @@ export const TASTE_OF_INDIA_BANNER_ASPECT_RATIO = 39 / 34;
 export const TASTE_OF_INDIA_BANNER_PLACEHOLDER_COLOR = '#F3F3F3';
 export const TASTE_OF_INDIA_BACK_ICON_COLOR = '#111111';
 
-export const TASTE_OF_INDIA_MAP_ART_BOTTOM = 636;
 export const TASTE_OF_INDIA_SHEET_MAX_HEIGHT_RATIO = 0.5;
 
 export const TASTE_OF_INDIA_DISH_OVERLAY_COLORS = [

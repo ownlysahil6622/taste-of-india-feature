@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent, type RefObject } from "react";
 import MapArtwork from "./MapArtwork";
 
 type Dish = {
@@ -148,22 +148,25 @@ const states: StateData[] = [
   },
 ];
 
-const MAP_SIZE = 461;
-const MAP_CENTER_OFFSET = 14.5;
-const MAP_ART_BOTTOM = 636;
-const ANCHOR_CENTER_X = 195;
-// Horizontal span of every marker + label on the 390px design frame
-// (Maharashtra label on the left, West Bengal label on the right).
-const CONTENT_LEFT = 13;
-const CONTENT_RIGHT = 376;
-const CONTENT_EDGE_MARGIN = 8;
-// Lowered from 1.05 so the whole content span fits a 390px screen with
-// CONTENT_EDGE_MARGIN on both sides (1.05 left under 5px).
+// The map, markers, labels and hit areas live on one "stage" in the 390x844 design-frame
+// coordinates. The whole stage is translated and scaled so the content fits the visible area.
+const STAGE_WIDTH = 390;
+const STAGE_HEIGHT = 844;
+// Pixel bounds of the visible content on the stage (India artwork incl. the North-East,
+// plus every marker and label), measured from the rendered artwork.
+const CONTENT_BOUNDS = { left: 5, right: 415, top: 192, bottom: 636 };
+// Horizontal span of the markers + labels only (Maharashtra label to West Bengal label).
+const LABEL_BOUNDS = { left: 14, right: 376 };
+const CONTENT_CENTER_X = (CONTENT_BOUNDS.left + CONTENT_BOUNDS.right) / 2;
+const CONTENT_CENTER_Y = (CONTENT_BOUNDS.top + CONTENT_BOUNDS.bottom) / 2;
+const FIT_MARGIN_X = 16;
+const FIT_GAP_Y = 12;
+const MAX_FIT_SCALE = 1.6;
+// Selected-state zoom, multiplied on top of the fit scale (capped so no label is clipped).
 const FOCUS_SCALE = 1.03;
 const FOCUS_BOTTOM_GAP = 96;
 // Height of the fixed white header (must match .map-header in index.css).
 const HEADER_HEIGHT = 108;
-const MAP_TOP = 182;
 const DRAG_THRESHOLD = 8;
 const PAN_EDGE_MARGIN = 100;
 const MAX_VERTICAL_DRAG = 80;
@@ -172,21 +175,49 @@ const SHEET_DISMISS_VELOCITY = 0.8;
 
 type MapFocus = { scale: number; x: number; y: number };
 
-function computeMapFocus(width: number, height: number, obstruction: number, anchor: { x: number; y: number } | null): MapFocus {
-  if (!anchor) return { scale: 1, x: 0, y: 0 };
-  const contentHalfWidth = (CONTENT_RIGHT - CONTENT_LEFT) / 2;
-  const scale = Math.max(1, Math.min(FOCUS_SCALE, (width / 2 - CONTENT_EDGE_MARGIN) / contentHalfWidth));
+// Scale at which the whole content fits between the header and the discovery tip.
+function computeFitScale(width: number, height: number, tipHeight: number) {
+  const availableWidth = width - 2 * FIT_MARGIN_X;
+  const availableHeight = height - tipHeight - HEADER_HEIGHT - 2 * FIT_GAP_Y;
+  return Math.max(
+    0.1,
+    Math.min(
+      MAX_FIT_SCALE,
+      availableWidth / (CONTENT_BOUNDS.right - CONTENT_BOUNDS.left),
+      availableHeight / (CONTENT_BOUNDS.bottom - CONTENT_BOUNDS.top),
+    ),
+  );
+}
+
+function computeMapFocus(
+  width: number,
+  height: number,
+  obstruction: number,
+  tipHeight: number,
+  anchor: { x: number; y: number } | null,
+): MapFocus {
+  const fit = computeFitScale(width, height, tipHeight);
+  if (!anchor) {
+    // Default view: content centred in the area between the header and the discovery tip.
+    const visibleBottom = height - tipHeight;
+    return {
+      scale: fit,
+      x: width / 2 - fit * CONTENT_CENTER_X,
+      y: (HEADER_HEIGHT + visibleBottom) / 2 - fit * CONTENT_CENTER_Y,
+    };
+  }
+  // Same for every state: zoom on top of the fit, keeping every label inside the side margins.
+  const labelFit =
+    (width / 2 - FIT_MARGIN_X) / Math.max(CONTENT_CENTER_X - LABEL_BOUNDS.left, LABEL_BOUNDS.right - CONTENT_CENTER_X);
+  const scale = Math.min(fit * FOCUS_SCALE, Math.max(fit, labelFit));
   const visibleBottom = height - obstruction;
-  // Same for every state: centre the full marker/label span horizontally.
-  const contentCenterX = width / 2 + ((CONTENT_LEFT + CONTENT_RIGHT) / 2 - ANCHOR_CENTER_X);
-  const mapLeft = width / 2 + MAP_CENTER_OFFSET - MAP_SIZE / 2;
-  const minX = width - scale * (mapLeft + MAP_SIZE);
-  const maxX = -scale * mapLeft;
-  const minY = visibleBottom - FOCUS_BOTTOM_GAP - scale * MAP_ART_BOTTOM;
+  const maxY = HEADER_HEIGHT + FIT_GAP_Y - scale * CONTENT_BOUNDS.top;
+  const minY = visibleBottom - FOCUS_BOTTOM_GAP - scale * CONTENT_BOUNDS.bottom;
   return {
     scale,
-    x: Math.min(maxX, Math.max(minX, width / 2 - scale * contentCenterX)),
-    y: Math.min(0, Math.max(minY, visibleBottom / 2 - scale * anchor.y)),
+    // X is the same for every state (and matches the default view), so the map only moves vertically.
+    x: width / 2 - scale * CONTENT_CENTER_X,
+    y: Math.min(maxY, Math.max(minY, (HEADER_HEIGHT + visibleBottom) / 2 - scale * anchor.y)),
   };
 }
 
@@ -432,8 +463,13 @@ export default function App() {
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [markerPulse, setMarkerPulse] = useState(0);
   const [obstruction, setObstruction] = useState(0);
+  const [tipHeight, setTipHeight] = useState(0);
+  const handleTipHeight = useCallback((height: number) => {
+    setObstruction(height);
+    setTipHeight(height);
+  }, []);
   const shellRef = useRef<HTMLElement>(null);
-  const [shellSize, setShellSize] = useState({ width: 390, height: window.innerHeight });
+  const [shellSize, setShellSize] = useState({ width: Math.min(window.innerWidth, 430), height: window.innerHeight });
   const [pan, setPan] = useState({ x: 0, y: 0 }); // pan.x stays 0: vertical drag only
   const [dragging, setDragging] = useState(false);
   const dragRef = useRef<{ id: number; startX: number; startY: number; panY: number; active: boolean } | null>(null);
@@ -479,7 +515,7 @@ export default function App() {
     return () => window.removeEventListener("keydown", close);
   }, [selectedDish]);
 
-  const focus = computeMapFocus(shellSize.width, shellSize.height, obstruction, selected ? selected.marker : null);
+  const focus = computeMapFocus(shellSize.width, shellSize.height, obstruction, tipHeight, selected ? selected.marker : null);
   const bounds = computeMapPanBounds(shellSize.height, obstruction, focus.scale, focus.x, focus.y, !selected);
   const worldX = focus.x; // fixed for every state; bounds.minX === bounds.maxX
   const worldY = clamp(focus.y + pan.y, bounds.minY, bounds.maxY);
@@ -538,7 +574,7 @@ export default function App() {
     <main ref={shellRef} className={`app-shell ${selected ? "is-selected" : ""}`} onClick={handleShellClick}>
       <div
         className="scene-transform"
-        style={{ transform: worldTransform, transition: dragging ? "none" : undefined }}
+        style={{ width: STAGE_WIDTH, height: STAGE_HEIGHT, transform: worldTransform, transition: dragging ? "none" : undefined }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerEnd}
@@ -608,7 +644,7 @@ export default function App() {
       </header>
 
       {!selected && (
-        <DiscoveryTip onHeight={setObstruction} />
+        <DiscoveryTip onHeight={handleTipHeight} />
       )}
 
       {selected && (

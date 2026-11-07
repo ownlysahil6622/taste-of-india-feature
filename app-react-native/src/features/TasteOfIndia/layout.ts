@@ -1,17 +1,14 @@
 import type { ViewStyle } from 'react-native';
 
 import {
+  TASTE_OF_INDIA_CONTENT_BOUNDS,
+  TASTE_OF_INDIA_FIT_GAP_Y,
+  TASTE_OF_INDIA_FIT_MARGIN_X,
   TASTE_OF_INDIA_FOCUS_BOTTOM_GAP,
-  TASTE_OF_INDIA_FOCUS_CONTENT_EDGE_MARGIN,
-  TASTE_OF_INDIA_FOCUS_CONTENT_LEFT,
-  TASTE_OF_INDIA_FOCUS_CONTENT_RIGHT,
   TASTE_OF_INDIA_FOCUS_SCALE,
-  TASTE_OF_INDIA_MAP_TOP,
-  TASTE_OF_INDIA_MAP_ART_BOTTOM,
-  TASTE_OF_INDIA_MAP_CENTER_OFFSET,
-  TASTE_OF_INDIA_MAP_SIZE,
+  TASTE_OF_INDIA_LABEL_BOUNDS,
+  TASTE_OF_INDIA_MAX_FIT_SCALE,
   TASTE_OF_INDIA_MAX_VERTICAL_DRAG,
-  TASTE_OF_INDIA_MARKER_ANCHOR_CENTER_X,
   TASTE_OF_INDIA_PAN_EDGE_MARGIN,
 } from './constants';
 import type { TasteOfIndiaInset } from './types';
@@ -36,55 +33,92 @@ export const resolveInsetStyle = (
 type MapFocusInput = {
   width: number;
   height: number;
+  /** Height of whatever covers the bottom now (discovery tip or state sheet). */
   obstruction: number;
+  /** Last measured discovery-tip height; the default view fits above it. */
+  tipHeight: number;
+  headerHeight: number;
   anchor: { x: number; y: number } | null;
 };
 
-export const IDENTITY_MAP_FOCUS = { scale: 1, translateX: 0, translateY: 0 };
+const CONTENT_CENTER_X =
+  (TASTE_OF_INDIA_CONTENT_BOUNDS.left + TASTE_OF_INDIA_CONTENT_BOUNDS.right) /
+  2;
+const CONTENT_CENTER_Y =
+  (TASTE_OF_INDIA_CONTENT_BOUNDS.top + TASTE_OF_INDIA_CONTENT_BOUNDS.bottom) /
+  2;
+
+/** Scale at which the whole content fits between the header and the tip. */
+export const computeFitScale = ({
+  width,
+  height,
+  tipHeight,
+  headerHeight,
+}: Pick<MapFocusInput, 'width' | 'height' | 'tipHeight' | 'headerHeight'>) => {
+  const availableWidth = width - 2 * TASTE_OF_INDIA_FIT_MARGIN_X;
+  const availableHeight =
+    height - tipHeight - headerHeight - 2 * TASTE_OF_INDIA_FIT_GAP_Y;
+  return Math.max(
+    0.1,
+    Math.min(
+      TASTE_OF_INDIA_MAX_FIT_SCALE,
+      availableWidth /
+        (TASTE_OF_INDIA_CONTENT_BOUNDS.right -
+          TASTE_OF_INDIA_CONTENT_BOUNDS.left),
+      availableHeight /
+        (TASTE_OF_INDIA_CONTENT_BOUNDS.bottom -
+          TASTE_OF_INDIA_CONTENT_BOUNDS.top),
+    ),
+  );
+};
 
 export const computeMapFocus = ({
   width,
   height,
   obstruction,
+  tipHeight,
+  headerHeight,
   anchor,
 }: MapFocusInput) => {
+  const fit = computeFitScale({ width, height, tipHeight, headerHeight });
   if (!anchor) {
-    return IDENTITY_MAP_FOCUS;
+    // Default view: content centred between the header and the tip.
+    const visibleBottom = height - tipHeight;
+    return {
+      scale: fit,
+      translateX: width / 2 - fit * CONTENT_CENTER_X,
+      translateY: (headerHeight + visibleBottom) / 2 - fit * CONTENT_CENTER_Y,
+    };
   }
-  const contentHalfWidth =
-    (TASTE_OF_INDIA_FOCUS_CONTENT_RIGHT - TASTE_OF_INDIA_FOCUS_CONTENT_LEFT) /
-    2;
-  const scale = Math.max(
-    1,
-    Math.min(
-      TASTE_OF_INDIA_FOCUS_SCALE,
-      (width / 2 - TASTE_OF_INDIA_FOCUS_CONTENT_EDGE_MARGIN) / contentHalfWidth,
-    ),
+  // Same for every state: zoom on top of the fit, keeping every label inside
+  // the side margins.
+  const labelFit =
+    (width / 2 - TASTE_OF_INDIA_FIT_MARGIN_X) /
+    Math.max(
+      CONTENT_CENTER_X - TASTE_OF_INDIA_LABEL_BOUNDS.left,
+      TASTE_OF_INDIA_LABEL_BOUNDS.right - CONTENT_CENTER_X,
+    );
+  const scale = Math.min(
+    fit * TASTE_OF_INDIA_FOCUS_SCALE,
+    Math.max(fit, labelFit),
   );
   const visibleBottom = height - obstruction;
-  // Same for every state: centre the full marker/label span horizontally,
-  // so switching states only moves the map vertically.
-  const contentCenterX =
-    width / 2 +
-    ((TASTE_OF_INDIA_FOCUS_CONTENT_LEFT + TASTE_OF_INDIA_FOCUS_CONTENT_RIGHT) /
-      2 -
-      TASTE_OF_INDIA_MARKER_ANCHOR_CENTER_X);
-  const pointY = anchor.y;
-  const mapLeft =
-    width / 2 + TASTE_OF_INDIA_MAP_CENTER_OFFSET - TASTE_OF_INDIA_MAP_SIZE / 2;
-  const minX = width - scale * (mapLeft + TASTE_OF_INDIA_MAP_SIZE);
-  const maxX = -scale * mapLeft;
+  const maxY =
+    headerHeight +
+    TASTE_OF_INDIA_FIT_GAP_Y -
+    scale * TASTE_OF_INDIA_CONTENT_BOUNDS.top;
   const minY =
     visibleBottom -
     TASTE_OF_INDIA_FOCUS_BOTTOM_GAP -
-    scale * TASTE_OF_INDIA_MAP_ART_BOTTOM;
+    scale * TASTE_OF_INDIA_CONTENT_BOUNDS.bottom;
   return {
     scale,
-    translateX: Math.min(
-      maxX,
-      Math.max(minX, width / 2 - scale * contentCenterX),
+    // Same X for every state (and the default view): only vertical movement.
+    translateX: width / 2 - scale * CONTENT_CENTER_X,
+    translateY: Math.min(
+      maxY,
+      Math.max(minY, (headerHeight + visibleBottom) / 2 - scale * anchor.y),
     ),
-    translateY: Math.min(0, Math.max(minY, visibleBottom / 2 - scale * pointY)),
   };
 };
 

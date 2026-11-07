@@ -26,14 +26,17 @@
 .app-shell {
   position: relative;
   width: min(100%, 430px);
+  margin: 0 auto;
   height: 100dvh;
   overflow: hidden;
   background: #fff7fb;
 }
 
 .scene-transform {
+  /* Fixed 390x844 design-frame stage; App.tsx sizes, centres and scales it. */
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   touch-action: none;
   transform-origin: 0 0;
   transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
