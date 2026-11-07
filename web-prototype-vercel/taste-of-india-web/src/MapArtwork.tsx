@@ -72,14 +72,15 @@ function StateLayer({
 }) {
   return (
     <>
+      {/* Both layers stay rendered so the selected colour cross-fades (opacity only). */}
       <img
         alt=""
-        className={`absolute inset-0 block max-w-none size-full ${active ? "invisible" : "visible"}`}
+        className={`absolute inset-0 block max-w-none size-full state-layer-dormant ${active ? "is-off" : ""}`}
         src={dormantAsset}
       />
       <img
         alt=""
-        className={`absolute inset-0 block max-w-none size-full ${active ? "visible" : "invisible"}`}
+        className={`absolute inset-0 block max-w-none size-full state-layer-selected ${active ? "is-on" : ""}`}
         src={selectedStateAssets[state]}
       />
     </>
@@ -870,7 +871,7 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
         <div className="absolute content-stretch flex inset-[83.73%_63.57%_4.92%_16.7%] items-center justify-center" data-node-id="2642:2695">
           <div className="bg-white content-stretch flex items-center justify-center mr-[-1px] overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2696">
             <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2697" style={{ fontFeatureSettings: '"dlig" 1' }}>
-              Kerela
+              Kerala
             </p>
           </div>
           <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid leading-[0] place-items-start relative shrink-0" data-node-id="2642:2698">
