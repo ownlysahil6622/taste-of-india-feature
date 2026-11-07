@@ -221,7 +221,6 @@ const INVITE_STATES = new Set(["Punjab", "Tamil Nadu"]);
 const INTRO_SETTLE_MS = 1400;
 const INVITE_IDLE_MS = 2000;
 const SHEET_SWAP_OUT_MS = 120;
-const DETAIL_CLOSE_MS = 320;
 
 // The map, markers, labels and hit areas live on one "stage" in the 390x844 design-frame
 // coordinates. The whole stage is translated and scaled so the content fits the visible area.
@@ -410,7 +409,7 @@ function DiscoveryTip({ onHeight }: { onHeight: (height: number) => void }) {
   );
 }
 
-function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish: (dish: Dish, card: HTMLElement) => void }) {
+function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish: (dish: Dish) => void }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef(0);
   const [active, setActive] = useState(0);
@@ -441,7 +440,7 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
               type="button"
               className="dish-card"
               style={dish.banner ? { background: crop.fillColor } : undefined}
-              onClick={(event) => onSelectDish(dish, event.currentTarget)}
+              onClick={() => onSelectDish(dish)}
             >
               {/* The card shows the dish's banner (cropped to the dish); dishes without a banner keep their card image. */}
               <img src={dish.banner ?? dish.image} alt="" style={dish.banner ? cardCropStyle(crop) : undefined} />
@@ -475,12 +474,13 @@ function BottomSheet({
   state: StateData;
   onHeight: (height: number) => void;
   onClose: () => void;
-  onSelectDish: (dish: Dish, card: HTMLElement) => void;
+  onSelectDish: (dish: Dish) => void;
 }) {
   const sheetRef = useRef<HTMLElement>(null);
   const sheetDragRef = useRef<{ id: number; startY: number; startX: number; startTime: number; active: boolean } | null>(null);
-  // The state whose content is on screen. When the selected state changes, the old content fades out
-  // quickly, then the new content mounts and plays its entrance animations.
+  // The state whose dish cards are on screen. When the selected state changes, the old cards fade out
+  // quickly, then the new cards mount and slide in. The header (illustration, name, subtitle) uses
+  // `state` directly, so it updates instantly with no animation.
   const [shown, setShown] = useState(state);
   const [leaving, setLeaving] = useState(false);
   useReportHeight(sheetRef, onHeight);
@@ -550,15 +550,17 @@ function BottomSheet({
     >
       <button className="sheet-handle" onClick={onClose} aria-label="Close state details" />
       <div className="sheet-body">
-        <div key={shown.name} className={`sheet-content ${leaving ? "is-leaving" : ""}`}>
+        <div className="sheet-content">
           <header className="sheet-header">
-            <StateIllustration state={shown} />
+            <StateIllustration state={state} />
             <div>
-              <h2>{shown.name}</h2>
+              <h2>{state.name}</h2>
               <p>Popular regional dishes</p>
             </div>
           </header>
-          <DishCarousel state={shown} onSelectDish={onSelectDish} />
+          <div key={shown.name} className={`sheet-cards ${leaving ? "is-leaving" : ""}`}>
+            <DishCarousel state={shown} onSelectDish={onSelectDish} />
+          </div>
         </div>
       </div>
     </section>
@@ -600,20 +602,13 @@ function RestaurantCard() {
   );
 }
 
-/** Where the tapped card sits in the shell, so the detail screen can grow out of it and shrink back. */
-type DetailOrigin = { x: number; y: number; scale: number };
-
 function DishDetail({
   dish,
   state,
-  origin,
-  closing,
   onBack,
 }: {
   dish: Dish;
   state: StateData;
-  origin: DetailOrigin;
-  closing: boolean;
   onBack: () => void;
 }) {
   const description =
@@ -623,8 +618,7 @@ function DishDetail({
 
   return (
     <section
-      className={`dish-detail-screen ${closing ? "is-closing" : "is-opening"}`}
-      style={{ "--from-x": `${origin.x}px`, "--from-y": `${origin.y}px`, "--from-scale": origin.scale } as CSSProperties}
+      className="dish-detail-screen"
       aria-label={`${dish.name} collection`}
     >
       <div className="detail-scroll">
@@ -655,8 +649,7 @@ function DishDetail({
 
 export default function App() {
   const [selected, setSelected] = useState<StateData | null>(null);
-  const [detail, setDetail] = useState<{ dish: Dish; origin: DetailOrigin } | null>(null);
-  const [detailClosing, setDetailClosing] = useState(false);
+  const [detail, setDetail] = useState<{ dish: Dish } | null>(null);
   const [markerPulse, setMarkerPulse] = useState(0);
   const [obstruction, setObstruction] = useState(0);
   const [tipHeight, setTipHeight] = useState(0);
@@ -710,27 +703,25 @@ export default function App() {
     hapticTick();
   };
 
-  const openDish = (dish: Dish, card: HTMLElement) => {
-    const shellRect = shellRef.current?.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
-    const origin: DetailOrigin = shellRect
-      ? { x: cardRect.left - shellRect.left, y: cardRect.top - shellRect.top, scale: cardRect.width / shellRect.width }
-      : { x: 0, y: 0, scale: 1 };
-    setDetailClosing(false);
-    setDetail({ dish, origin });
+  // The detail page opens as a new history entry, so the browser back button closes it too.
+  // The map screen stays mounted underneath, so the selected state, sheet and card scroll are kept.
+  const openDish = (dish: Dish) => {
+    setDetail({ dish });
+    window.history.pushState({ tasteOfIndiaDetail: true }, "");
   };
 
-  const closeDish = useCallback(() => setDetailClosing(true), []);
+  const closeDish = useCallback(() => {
+    if (window.history.state?.tasteOfIndiaDetail) window.history.back(); // popstate below closes it
+    else setDetail(null);
+  }, []);
 
-  // Let the reverse transition play before unmounting the detail screen.
   useEffect(() => {
-    if (!detailClosing) return;
-    const timer = window.setTimeout(() => {
-      setDetail(null);
-      setDetailClosing(false);
-    }, DETAIL_CLOSE_MS);
-    return () => window.clearTimeout(timer);
-  }, [detailClosing]);
+    const handlePopState = () => {
+      if (detail) setDetail(null);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [detail]);
 
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
@@ -869,7 +860,7 @@ export default function App() {
       )}
 
       {selected && detail && (
-        <DishDetail dish={detail.dish} state={selected} origin={detail.origin} closing={detailClosing} onBack={closeDish} />
+        <DishDetail dish={detail.dish} state={selected} onBack={closeDish} />
       )}
     </main>
   );

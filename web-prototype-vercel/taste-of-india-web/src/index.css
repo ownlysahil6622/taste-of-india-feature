@@ -90,7 +90,7 @@
   display: none;
 }
 
-/* State shapes: the selected colour cross-fades in; other states dim while one is selected. */
+/* State shapes: the selected colour cross-fades in. */
 .map-world img {
   transition: opacity 280ms ease;
 }
@@ -105,10 +105,6 @@
 
 .map-world .state-layer-dormant.is-off {
   opacity: 0;
-}
-
-.is-selected .map-world img:not(.state-layer-selected):not(.is-off) {
-  opacity: 0.7;
 }
 
 .state-hitboxes {
@@ -165,10 +161,6 @@
 .pin:focus-visible .pin-tile {
   outline: 3px solid rgb(225 12 96 / 0.55);
   outline-offset: 3px;
-}
-
-.is-selected .pin:not(.is-selected) {
-  opacity: 0.7;
 }
 
 /* Entrance: pins drop in one by one, north to south, with a small bounce. */
@@ -464,24 +456,20 @@
   align-items: flex-start;
   gap: 16px;
   width: 100%;
+}
+
+/* Dish cards + dots. Switching states: the old cards fade out quickly before the new cards slide in.
+   The header above them updates instantly with no animation. */
+.sheet-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
   transition: opacity 120ms ease;
 }
 
-/* Switching states: the old content fades out quickly before the new content animates in. */
-.sheet-content.is-leaving {
+.sheet-cards.is-leaving {
   opacity: 0;
-}
-
-.sheet-content .state-illustration {
-  animation: illustration-in 420ms cubic-bezier(0.2, 0, 0, 1) both;
-}
-
-.sheet-header h2 {
-  animation: fade-up 360ms cubic-bezier(0.2, 0, 0, 1) 60ms both;
-}
-
-.sheet-header p {
-  animation: fade-up 360ms cubic-bezier(0.2, 0, 0, 1) 110ms both;
 }
 
 .sheet-header {
@@ -830,28 +818,6 @@
   }
 }
 
-@keyframes illustration-in {
-  from {
-    opacity: 0;
-    transform: translateX(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @keyframes card-in {
   from {
     opacity: 0;
@@ -860,35 +826,6 @@
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-/* Dish detail grows out of the tapped card, and shrinks back into it. */
-@keyframes detail-open {
-  from {
-    opacity: 0.35;
-    transform: translate(var(--from-x), var(--from-y)) scale(var(--from-scale));
-  }
-  40% {
-    opacity: 1;
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes detail-close {
-  from {
-    opacity: 1;
-    transform: none;
-  }
-  60% {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    transform: translate(var(--from-x), var(--from-y)) scale(var(--from-scale));
   }
 }
 
@@ -901,30 +838,13 @@
   }
 }
 
-@keyframes fade-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
 .dish-detail-screen {
   position: absolute;
   z-index: 50;
   inset: 0;
   background: #fff;
-  transform-origin: 0 0;
 }
 
-.dish-detail-screen.is-opening {
-  animation: detail-open 440ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.dish-detail-screen.is-closing {
-  animation: detail-close 320ms cubic-bezier(0.4, 0, 0.6, 1) both;
-}
 
 .detail-scroll {
   height: 100%;
@@ -1182,17 +1102,9 @@
   .pin-drop,
   .bottom-sheet,
   .discovery-tip,
-  .sheet-content .state-illustration,
-  .sheet-header h2,
-  .sheet-header p,
-  .dish-slot,
-  .dish-detail-screen.is-opening {
+  .dish-slot {
     animation: fade-in 220ms ease-out both;
     animation-delay: 0ms;
-  }
-
-  .dish-detail-screen.is-closing {
-    animation: fade-out 200ms ease-in both;
   }
 
   .pin.is-selected .pin-body,
