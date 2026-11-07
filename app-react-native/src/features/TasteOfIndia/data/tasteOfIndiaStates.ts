@@ -1,24 +1,7 @@
-import type {
-  TasteOfIndiaCardImageCrop,
-  TasteOfIndiaState,
-} from '../types';
+import type { TasteOfIndiaState } from '../types';
 
 const DEFAULT_DISH_DESCRIPTION =
   'A much-loved regional dish, layered with local spices and traditional flavours.';
-
-// Punjab banners (587x510) reused as dish cards. Every Punjab banner has the
-// dish centred at x≈294, ending by y≈352, with the banner's own text starting
-// at y≈360: show x 143–446 from y 175 and cut off at y 356, filling the rest of
-// the card with the banner's pale pink.
-const PUNJAB_BANNER_CARD_CROP: TasteOfIndiaCardImageCrop = {
-  sourceWidth: 587,
-  sourceHeight: 510,
-  x: 143,
-  y: 175,
-  width: 303,
-  height: 181,
-  fillColor: '#FFE8F3',
-};
 
 export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
   {
@@ -34,41 +17,37 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M94 235 132 232 135 272 116 287 92 266Z',
     target: { left: '35%', top: '30%', width: '14%', height: '3.5%' },
     markerAnchor: { x: 115, y: 266 },
+    bannerWidth: 587,
     dishes: [
       {
         name: 'Amritsari Kulche',
-        imageKey: 'banners/amritsari-kulche.png',
+        imageKey: 'cards/punjab-amritsari-kulche.png',
         bannerKey: 'banners/amritsari-kulche.png',
         description: DEFAULT_DISH_DESCRIPTION,
-        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Butter Chicken',
-        imageKey: 'banners/butter-chicken.png',
+        imageKey: 'cards/punjab-butter-chicken.png',
         bannerKey: 'banners/butter-chicken.png',
         description: DEFAULT_DISH_DESCRIPTION,
-        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Chole Bhature',
-        imageKey: 'banners/chole-bhature.png',
+        imageKey: 'cards/punjab-chole-bhature.png',
         bannerKey: 'banners/chole-bhature.png',
         description: DEFAULT_DISH_DESCRIPTION,
-        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Dal Makhni',
-        imageKey: 'banners/dal-makhni.png',
+        imageKey: 'cards/punjab-dal-makhni.png',
         bannerKey: 'banners/dal-makhni.png',
         description: DEFAULT_DISH_DESCRIPTION,
-        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Lassi',
-        imageKey: 'banners/lassi.png',
+        imageKey: 'cards/punjab-lassi.png',
         bannerKey: 'banners/lassi.png',
         description: DEFAULT_DISH_DESCRIPTION,
-        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
     ],
   },
@@ -79,6 +58,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M139 292 211 284 231 319 204 350 146 339Z',
     target: { left: '52%', top: '38%', width: '18%', height: '3.5%' },
     markerAnchor: { x: 175, y: 330 },
+    bannerWidth: 635,
     dishes: [
       {
         name: 'Gahloti Kebab',
@@ -107,6 +87,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M274 343 306 346 311 403 282 413 270 381Z',
     target: { left: '78%', top: '44%', width: '22%', height: '3.5%' },
     markerAnchor: { x: 288, y: 380 },
+    bannerWidth: 596,
     dishes: [
       {
         name: 'Kosha Mangsho',
@@ -147,6 +128,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M67 387 129 391 142 442 115 474 74 455Z',
     target: { left: '0%', top: '49%', width: '21%', height: '3.5%' },
     markerAnchor: { x: 97, y: 426 },
+    bannerWidth: 587,
     dishes: [
       {
         name: 'Vada Pav',
@@ -187,6 +169,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M137 415 184 414 195 454 176 477 143 463Z',
     target: { left: '45%', top: '52%', width: '18%', height: '3.5%' },
     markerAnchor: { x: 158, y: 454 },
+    bannerWidth: 614,
     dishes: [
       {
         name: 'Hyderabadi Biryani',
@@ -227,6 +210,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M164 465 215 456 220 505 181 526 158 501Z',
     target: { left: '50%', top: '58%', width: '23%', height: '3.5%' },
     markerAnchor: { x: 175, y: 500 },
+    bannerWidth: 596,
     dishes: [
       {
         name: 'Andhra Meal',
@@ -273,6 +257,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M78 458 128 457 145 523 121 550 91 519Z',
     target: { left: '4%', top: '59%', width: '20%', height: '3.5%' },
     markerAnchor: { x: 97, y: 507 },
+    bannerWidth: 587,
     dishes: [
       {
         name: 'Benne Masala Dosa',
@@ -313,6 +298,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M132 527 180 517 180 579 149 608 130 573Z',
     target: { left: '46%', top: '64%', width: '20%', height: '3.5%' },
     markerAnchor: { x: 158, y: 550 },
+    bannerWidth: 587,
     dishes: [
       {
         name: 'Chetinad Chicken',
@@ -365,6 +351,7 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     hitboxPath: 'M98 542 122 541 133 608 117 643 102 600Z',
     target: { left: '13%', top: '69%', width: '15%', height: '3.5%' },
     markerAnchor: { x: 120, y: 594 },
+    bannerWidth: 587,
     dishes: [
       {
         name: 'Appam with Stew',

@@ -6,8 +6,6 @@ type Dish = {
   image: string;
   banner?: string;
   description: string;
-  /** Optional crop for the 152x168 dish card: the part of the source image (in its own pixels) to show. */
-  cardCrop?: CardCrop;
 };
 
 /**
@@ -46,15 +44,20 @@ type StateData = {
   path: string;
   target: { left: string; top: string; width: string; height: string };
   marker: { x: number; y: number; image: string; count: number };
+  /** Pixel width of this state's dish banners (all are 510px tall). */
+  bannerWidth: number;
   dishes: Dish[];
 };
 
 const description = "A much-loved regional dish, layered with local spices and traditional flavours.";
 
-// Punjab banners (587x510) reused as dish cards. Every Punjab banner has the dish centred at x≈294,
-// ending by y≈352, with the banner's own text starting at y≈360: show x 143–446 from y 175 and cut
-// off at y 356, filling the rest of the card with the banner's pale pink.
-const PUNJAB_BANNER_CARD_CROP: CardCrop = { sourceWidth: 587, sourceHeight: 510, x: 143, y: 175, width: 303, height: 181, fillColor: "#ffe8f3" };
+// Dish cards reuse each dish's banner. Every banner is 510px tall with the same layout: dish centred
+// horizontally, ending by y≈356, and the banner's own text starting at y≈360. Some states' banners
+// are padded wider (587–635px), so the crop is centred on the banner's width: a 303px-wide window
+// from y 175, cut off at y 357 with the rest of the card filled in the banner's pale pink.
+function bannerCardCrop(bannerWidth: number): CardCrop {
+  return { sourceWidth: bannerWidth, sourceHeight: 510, x: bannerWidth / 2 - 151.5, y: 175, width: 303, height: 182, fillColor: "#ffe9f3" };
+}
 
 const states: StateData[] = [
   {
@@ -63,12 +66,13 @@ const states: StateData[] = [
     path: "M94 235 132 232 135 272 116 287 92 266Z",
     target: { left: "35%", top: "30%", width: "14%", height: "3.5%" },
     marker: { x: 115, y: 266, image: "/assets/1af0b.png", count: 5 },
+    bannerWidth: 587,
     dishes: [
-      { name: "Amritsari Kulche", image: "/assets/banners/amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
-      { name: "Butter Chicken", image: "/assets/banners/butter-chicken.png", banner: "/assets/banners/butter-chicken.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
-      { name: "Chole Bhature", image: "/assets/banners/chole-bhature.png", banner: "/assets/banners/chole-bhature.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
-      { name: "Dal Makhni", image: "/assets/banners/dal-makhni.png", banner: "/assets/banners/dal-makhni.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
-      { name: "Lassi", image: "/assets/banners/lassi.png", banner: "/assets/banners/lassi.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
+      { name: "Amritsari Kulche", image: "/assets/cards/punjab-amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", description },
+      { name: "Butter Chicken", image: "/assets/cards/punjab-butter-chicken.png", banner: "/assets/banners/butter-chicken.png", description },
+      { name: "Chole Bhature", image: "/assets/cards/punjab-chole-bhature.png", banner: "/assets/banners/chole-bhature.png", description },
+      { name: "Dal Makhni", image: "/assets/cards/punjab-dal-makhni.png", banner: "/assets/banners/dal-makhni.png", description },
+      { name: "Lassi", image: "/assets/cards/punjab-lassi.png", banner: "/assets/banners/lassi.png", description },
     ],
   },
   {
@@ -77,6 +81,7 @@ const states: StateData[] = [
     path: "M139 292 211 284 231 319 204 350 146 339Z",
     target: { left: "52%", top: "38%", width: "18%", height: "3.5%" },
     marker: { x: 175, y: 330, image: "/assets/87b02.png", count: 4 },
+    bannerWidth: 635,
     dishes: [
       { name: "Gahloti Kebab", image: "/assets/cards/uttar-pradesh-gahloti-kebab.png", banner: "/assets/banners/gahloti-kebab.png", description },
       { name: "Awadhi Biryani", image: "/assets/cards/uttar-pradesh-awadhi-biryani.png", banner: "/assets/banners/awadhi-biryani.png", description },
@@ -89,6 +94,7 @@ const states: StateData[] = [
     path: "M274 343 306 346 311 403 282 413 270 381Z",
     target: { left: "78%", top: "44%", width: "22%", height: "3.5%" },
     marker: { x: 288, y: 380, image: "/assets/4e4f7.png", count: 5 },
+    bannerWidth: 596,
     dishes: [
       { name: "Kosha Mangsho", image: "/assets/cards/west-bengal-kosha-mangsho.png", banner: "/assets/banners/kosha-mangsho.png", description },
       { name: "Kolkata Biryani", image: "/assets/cards/west-bengal-kolkata-biryani.png", banner: "/assets/banners/kolkata-biryani.png", description },
@@ -102,6 +108,7 @@ const states: StateData[] = [
     path: "M67 387 129 391 142 442 115 474 74 455Z",
     target: { left: "0%", top: "49%", width: "21%", height: "3.5%" },
     marker: { x: 97, y: 426, image: "/assets/52a48.png", count: 6 },
+    bannerWidth: 587,
     dishes: [
       { name: "Vada Pav", image: "/assets/cards/maharashtra-vada-pav.png", banner: "/assets/banners/vada-pav.png", description },
       { name: "Misal Pav", image: "/assets/cards/maharashtra-misal-pav.png", banner: "/assets/banners/misal-pav.png", description },
@@ -116,6 +123,7 @@ const states: StateData[] = [
     path: "M137 415 184 414 195 454 176 477 143 463Z",
     target: { left: "45%", top: "52%", width: "18%", height: "3.5%" },
     marker: { x: 158, y: 454, image: "/assets/ab8bd.png", count: 2 },
+    bannerWidth: 614,
     dishes: [
       { name: "Hyderabadi Biryani", image: "/assets/cards/telangana-hyderabadi-biryani.png", banner: "/assets/banners/hyderabadi-biryani.png", description },
       { name: "Haleem", image: "/assets/cards/telangana-haleem.png", banner: "/assets/banners/haleem.png", description },
@@ -130,6 +138,7 @@ const states: StateData[] = [
     path: "M164 465 215 456 220 505 181 526 158 501Z",
     target: { left: "50%", top: "58%", width: "23%", height: "3.5%" },
     marker: { x: 175, y: 500, image: "/assets/8d705.png", count: 6 },
+    bannerWidth: 596,
     dishes: [
       { name: "Andhra Meal", image: "/assets/cards/andhra-pradesh-andhra-meal.png", banner: "/assets/banners/andhra-meal.png", description },
       { name: "Gongura Mutton", image: "/assets/cards/andhra-pradesh-gongura-mutton.png", banner: "/assets/banners/gongura-mutton.png", description },
@@ -145,6 +154,7 @@ const states: StateData[] = [
     path: "M78 458 128 457 145 523 121 550 91 519Z",
     target: { left: "4%", top: "59%", width: "20%", height: "3.5%" },
     marker: { x: 97, y: 507, image: "/assets/13c75.png", count: 5 },
+    bannerWidth: 587,
     dishes: [
       { name: "Benne Masala Dosa", image: "/assets/cards/karnataka-benne-masala-dosa.png", banner: "/assets/banners/benne-masala-dosa.png", description },
       { name: "Bisi Bele Bath", image: "/assets/cards/karnataka-bisi-bele-bath.png", banner: "/assets/banners/bisi-bele-bath.png", description },
@@ -159,6 +169,7 @@ const states: StateData[] = [
     path: "M132 527 180 517 180 579 149 608 130 573Z",
     target: { left: "46%", top: "64%", width: "20%", height: "3.5%" },
     marker: { x: 158, y: 550, image: "/assets/032d7.png", count: 4 },
+    bannerWidth: 587,
     dishes: [
       { name: "Chetinad Chicken", image: "/assets/cards/tamil-nadu-chetinad-chicken.png", banner: "/assets/banners/chetinad-chicken.png", description },
       { name: "Kothu Parotta", image: "/assets/cards/tamil-nadu-kothu-parotta.png", banner: "/assets/banners/kothu-parotta.png", description },
@@ -174,6 +185,7 @@ const states: StateData[] = [
     path: "M98 542 122 541 133 608 117 643 102 600Z",
     target: { left: "13%", top: "69%", width: "15%", height: "3.5%" },
     marker: { x: 120, y: 594, image: "/assets/50eed.png", count: 3 },
+    bannerWidth: 587,
     dishes: [
       { name: "Appam with Stew", image: "/assets/cards/kerela-appam-with-stew.png", banner: "/assets/banners/appam-with-stew.png", description },
       { name: "Malabar Biryani", image: "/assets/cards/kerela-malabar-biryani.png", banner: "/assets/banners/malabar-biryani.png", description },
@@ -336,6 +348,7 @@ function BottomSheet({
   onSelectDish: (dish: Dish) => void;
 }) {
   const sheetRef = useRef<HTMLElement>(null);
+  const bannerCrop = bannerCardCrop(state.bannerWidth);
   const sheetDragRef = useRef<{ id: number; startY: number; startX: number; startTime: number; active: boolean } | null>(null);
   useReportHeight(sheetRef, onHeight);
 
@@ -405,10 +418,11 @@ function BottomSheet({
               className="dish-card"
               key={dish.name}
               role="listitem"
-              style={dish.cardCrop ? { background: dish.cardCrop.fillColor } : undefined}
+              style={dish.banner ? { background: bannerCrop.fillColor } : undefined}
               onClick={() => onSelectDish(dish)}
             >
-              <img src={dish.image} alt="" style={dish.cardCrop ? cardCropStyle(dish.cardCrop) : undefined} />
+              {/* The card shows the dish's banner (cropped to the dish); dishes without a banner keep their card image. */}
+              <img src={dish.banner ?? dish.image} alt="" style={dish.banner ? cardCropStyle(bannerCrop) : undefined} />
               <span className="dish-gradient" />
               <span className="dish-copy">
                 <strong>{dish.name}</strong>

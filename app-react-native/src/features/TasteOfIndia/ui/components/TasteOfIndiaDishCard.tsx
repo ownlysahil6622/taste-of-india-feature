@@ -20,8 +20,25 @@ export const TASTE_OF_INDIA_DISH_CARD_GAP = 8;
 
 type TasteOfIndiaDishCardProps = {
   dish: TasteOfIndiaDish;
+  /** Pixel width of the state's dish banners, used to centre the crop. */
+  bannerWidth: number;
   onPress: (dish: TasteOfIndiaDish) => void;
 };
+
+// Dish cards reuse each dish's banner. Every banner is 510px tall with the
+// same layout: dish centred horizontally, ending by y≈356, and the banner's own
+// text starting at y≈360. Some states' banners are padded wider (587–635px), so
+// the crop is centred on the banner's width: a 303px-wide window from y 175,
+// cut off at y 357 with the rest of the card filled in the banner's pale pink.
+const bannerCardCrop = (bannerWidth: number): TasteOfIndiaCardImageCrop => ({
+  sourceWidth: bannerWidth,
+  sourceHeight: 510,
+  x: bannerWidth / 2 - 151.5,
+  y: 175,
+  width: 303,
+  height: 182,
+  fillColor: '#FFE9F3',
+});
 
 const cardCropLayout = (crop: TasteOfIndiaCardImageCrop) => {
   const scale = TASTE_OF_INDIA_DISH_CARD_WIDTH / crop.width;
@@ -47,26 +64,26 @@ const cardCropLayout = (crop: TasteOfIndiaCardImageCrop) => {
 
 export const TasteOfIndiaDishCard = memo(function TasteOfIndiaDishCard({
   dish,
+  bannerWidth,
   onPress,
 }: TasteOfIndiaDishCardProps) {
+  // The card shows the dish's banner (cropped to the dish); dishes without a
+  // banner keep their card image.
+  const crop = dish.bannerKey ? bannerCardCrop(bannerWidth) : null;
+  const layout = crop ? cardCropLayout(crop) : null;
   return (
     <Pressable
-      style={[
-        styles.card,
-        dish.cardImageCrop
-          ? { backgroundColor: dish.cardImageCrop.fillColor }
-          : null,
-      ]}
+      style={[styles.card, crop ? { backgroundColor: crop.fillColor } : null]}
       onPress={() => onPress(dish)}
       accessibilityRole="button"
       accessibilityLabel={dish.name}
     >
-      {dish.cardImageCrop ? (
-        <View style={cardCropLayout(dish.cardImageCrop).clip}>
+      {dish.bannerKey && layout ? (
+        <View style={layout.clip}>
           <TasteOfIndiaImage
-            assetKey={dish.imageKey}
+            assetKey={dish.bannerKey}
             resizeMode="stretch"
-            style={cardCropLayout(dish.cardImageCrop).image}
+            style={layout.image}
           />
         </View>
       ) : (

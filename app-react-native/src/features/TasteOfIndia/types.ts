@@ -39,7 +39,6 @@ export type TasteOfIndiaDish = {
   imageKey: string;
   bannerKey?: string;
   description: string;
-  cardImageCrop?: TasteOfIndiaCardImageCrop;
 };
 
 export type TasteOfIndiaIllustrationCrop = {
@@ -64,6 +63,8 @@ export type TasteOfIndiaState = {
   hitboxPath: string;
   target: TasteOfIndiaStateTarget;
   markerAnchor: { x: number; y: number };
+  /** Pixel width of this state's dish banners (all are 510px tall). */
+  bannerWidth: number;
   dishes: readonly TasteOfIndiaDish[];
 };
 

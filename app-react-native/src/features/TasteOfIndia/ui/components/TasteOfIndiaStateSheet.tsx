@@ -139,6 +139,7 @@ export const TasteOfIndiaStateSheet = memo(function TasteOfIndiaStateSheet({
               <TasteOfIndiaDishCard
                 key={dish.name}
                 dish={dish}
+                bannerWidth={state.bannerWidth}
                 onPress={onSelectDish}
               />
             ))}
