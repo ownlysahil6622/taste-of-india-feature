@@ -6,6 +6,7 @@ import {
   TASTE_OF_INDIA_COLORS,
   TASTE_OF_INDIA_DISH_OVERLAY_COLORS,
   TASTE_OF_INDIA_DISH_OVERLAY_LOCATIONS,
+  TASTE_OF_INDIA_DISH_TEXT_SHADOW_COLOR,
   TASTE_OF_INDIA_FONTS,
 } from '../../constants';
 import type {
@@ -117,6 +118,12 @@ export const TasteOfIndiaDishCard = memo(function TasteOfIndiaDishCard({
   );
 });
 
+const textShadow = {
+  textShadowColor: TASTE_OF_INDIA_DISH_TEXT_SHADOW_COLOR,
+  textShadowOffset: { width: 0, height: 1 },
+  textShadowRadius: 3,
+};
+
 const styles = StyleSheet.create({
   card: {
     width: TASTE_OF_INDIA_DISH_CARD_WIDTH,
@@ -125,7 +132,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: TASTE_OF_INDIA_COLORS.white,
   },
-  overlay: { position: 'absolute', top: 0, right: -8, bottom: -11, left: -8 },
+  // Starts 48pt above the text block so the dish title sits on a dark area.
+  overlay: { position: 'absolute', top: -48, right: -8, bottom: -11, left: -8 },
   copy: {
     position: 'absolute',
     right: 8,
@@ -141,6 +149,7 @@ const styles = StyleSheet.create({
     lineHeight: 19.2,
     letterSpacing: -0.32,
     color: TASTE_OF_INDIA_COLORS.white,
+    ...textShadow,
   },
   description: {
     fontFamily: TASTE_OF_INDIA_FONTS.medium,
@@ -148,6 +157,7 @@ const styles = StyleSheet.create({
     lineHeight: 13.44,
     letterSpacing: -0.24,
     color: TASTE_OF_INDIA_COLORS.dishCopyDescription,
+    ...textShadow,
   },
   explore: {
     marginTop: 4,

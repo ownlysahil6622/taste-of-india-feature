@@ -115,7 +115,9 @@ export const TASTE_OF_INDIA_SHEET_MAX_HEIGHT_RATIO = 0.5;
 
 export const TASTE_OF_INDIA_DISH_OVERLAY_COLORS = [
   'rgba(14, 14, 14, 0)',
-  'rgba(14, 14, 14, 0.7)',
+  'rgba(14, 14, 14, 0.55)',
+  'rgba(14, 14, 14, 0.85)',
   'rgba(14, 14, 14, 1)',
 ];
-export const TASTE_OF_INDIA_DISH_OVERLAY_LOCATIONS = [0, 0.3, 1];
+export const TASTE_OF_INDIA_DISH_OVERLAY_LOCATIONS = [0, 0.25, 0.5, 1];
+export const TASTE_OF_INDIA_DISH_TEXT_SHADOW_COLOR = 'rgba(0, 0, 0, 0.6)';
