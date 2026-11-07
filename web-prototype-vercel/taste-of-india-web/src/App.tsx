@@ -152,14 +152,21 @@ const MAP_SIZE = 461;
 const MAP_CENTER_OFFSET = 14.5;
 const MAP_ART_BOTTOM = 636;
 const ANCHOR_CENTER_X = 195;
-const FOCUS_SCALE = 1.05;
+// Horizontal span of every marker + label on the 390px design frame
+// (Maharashtra label on the left, West Bengal label on the right).
+const CONTENT_LEFT = 13;
+const CONTENT_RIGHT = 376;
+const CONTENT_EDGE_MARGIN = 8;
+// Lowered from 1.05 so the whole content span fits a 390px screen with
+// CONTENT_EDGE_MARGIN on both sides (1.05 left under 5px).
+const FOCUS_SCALE = 1.03;
 const FOCUS_BOTTOM_GAP = 96;
 const BACK_BUTTON_SIZE = 36;
 const HEADER_BLUR_HEIGHT = 132;
 const MAP_TOP = 182;
 const DRAG_THRESHOLD = 8;
-const PAN_RANGE_X = 120;
 const PAN_EDGE_MARGIN = 100;
+const MAX_VERTICAL_DRAG = 80;
 const SHEET_DISMISS_DISTANCE = 80;
 const SHEET_DISMISS_VELOCITY = 0.8;
 
@@ -167,28 +174,42 @@ type MapFocus = { scale: number; x: number; y: number };
 
 function computeMapFocus(width: number, height: number, obstruction: number, anchor: { x: number; y: number } | null): MapFocus {
   if (!anchor) return { scale: 1, x: 0, y: 0 };
-  const scale = FOCUS_SCALE;
+  const contentHalfWidth = (CONTENT_RIGHT - CONTENT_LEFT) / 2;
+  const scale = Math.max(1, Math.min(FOCUS_SCALE, (width / 2 - CONTENT_EDGE_MARGIN) / contentHalfWidth));
   const visibleBottom = height - obstruction;
-  const pointX = width / 2 + (anchor.x - ANCHOR_CENTER_X);
+  // Same for every state: centre the full marker/label span horizontally.
+  const contentCenterX = width / 2 + ((CONTENT_LEFT + CONTENT_RIGHT) / 2 - ANCHOR_CENTER_X);
   const mapLeft = width / 2 + MAP_CENTER_OFFSET - MAP_SIZE / 2;
   const minX = width - scale * (mapLeft + MAP_SIZE);
   const maxX = -scale * mapLeft;
   const minY = visibleBottom - FOCUS_BOTTOM_GAP - scale * MAP_ART_BOTTOM;
   return {
     scale,
-    x: Math.min(maxX, Math.max(minX, width / 2 - scale * pointX)),
+    x: Math.min(maxX, Math.max(minX, width / 2 - scale * contentCenterX)),
     y: Math.min(0, Math.max(minY, visibleBottom / 2 - scale * anchor.y)),
   };
 }
 
-function computeMapPanBounds(height: number, obstruction: number, scale: number, restX: number) {
+function computeMapPanBounds(height: number, obstruction: number, scale: number, restX: number, restY: number, locked: boolean) {
+  // No state selected: the map can't be dragged at all.
+  if (locked) return { minX: restX, maxX: restX, minY: restY, maxY: restY };
   const visibleBottom = height - obstruction;
   const markerYs = states.map((item) => item.marker.y);
+  const markerMinY = HEADER_BLUR_HEIGHT + PAN_EDGE_MARGIN - scale * Math.max(...markerYs);
+  const markerMaxY = visibleBottom - PAN_EDGE_MARGIN - scale * Math.min(...markerYs);
+  // Use whichever limit is tighter: the marker limits or MAX_VERTICAL_DRAG from rest.
+  let minY = Math.max(markerMinY, restY - MAX_VERTICAL_DRAG);
+  let maxY = Math.min(markerMaxY, restY + MAX_VERTICAL_DRAG);
+  if (minY > maxY) {
+    // Rest sits more than MAX_VERTICAL_DRAG outside the marker limits: hold at the position shown today.
+    minY = maxY = clamp(restY, markerMinY, markerMaxY);
+  }
   return {
-    minX: restX - PAN_RANGE_X,
-    maxX: restX + PAN_RANGE_X,
-    minY: HEADER_BLUR_HEIGHT + PAN_EDGE_MARGIN - scale * Math.max(...markerYs),
-    maxY: visibleBottom - PAN_EDGE_MARGIN - scale * Math.min(...markerYs),
+    // Horizontal drag is locked: the map only scrolls vertically.
+    minX: restX,
+    maxX: restX,
+    minY,
+    maxY,
   };
 }
 
@@ -415,9 +436,9 @@ export default function App() {
   const headingRef = useRef<HTMLDivElement>(null);
   const [shellSize, setShellSize] = useState({ width: 390, height: window.innerHeight });
   const [titleCenter, setTitleCenter] = useState<number | null>(null);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [pan, setPan] = useState({ x: 0, y: 0 }); // pan.x stays 0: vertical drag only
   const [dragging, setDragging] = useState(false);
-  const dragRef = useRef<{ id: number; startX: number; startY: number; panX: number; panY: number; active: boolean } | null>(null);
+  const dragRef = useRef<{ id: number; startX: number; startY: number; panY: number; active: boolean } | null>(null);
   const justDraggedRef = useRef(false);
 
   useLayoutEffect(() => {
@@ -468,8 +489,8 @@ export default function App() {
   }, [selectedDish]);
 
   const focus = computeMapFocus(shellSize.width, shellSize.height, obstruction, selected ? selected.marker : null);
-  const bounds = computeMapPanBounds(shellSize.height, obstruction, focus.scale, focus.x);
-  const worldX = clamp(focus.x + pan.x, bounds.minX, bounds.maxX);
+  const bounds = computeMapPanBounds(shellSize.height, obstruction, focus.scale, focus.x, focus.y, !selected);
+  const worldX = focus.x; // fixed for every state; bounds.minX === bounds.maxX
   const worldY = clamp(focus.y + pan.y, bounds.minY, bounds.maxY);
   const worldTransform = `translate(${worldX}px, ${worldY}px) scale(${focus.scale})`;
 
@@ -481,7 +502,7 @@ export default function App() {
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
-    dragRef.current = { id: event.pointerId, startX: event.clientX, startY: event.clientY, panX: worldX - focus.x, panY: worldY - focus.y, active: false };
+    dragRef.current = { id: event.pointerId, startX: event.clientX, startY: event.clientY, panY: worldY - focus.y, active: false };
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -491,11 +512,14 @@ export default function App() {
     const dy = event.clientY - drag.startY;
     if (!drag.active) {
       if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return;
+      // Still counts as a drag (so the release isn't treated as a tap), even when nothing is selected.
       drag.active = true;
-      setDragging(true);
       event.currentTarget.setPointerCapture(event.pointerId);
+      if (selected) setDragging(true);
     }
-    setPan({ x: drag.panX + dx, y: drag.panY + dy });
+    // Dragging only moves the map while a state is selected.
+    if (!selected) return;
+    setPan({ x: 0, y: drag.panY + dy });
   };
 
   const handlePointerEnd = (event: ReactPointerEvent<HTMLDivElement>) => {

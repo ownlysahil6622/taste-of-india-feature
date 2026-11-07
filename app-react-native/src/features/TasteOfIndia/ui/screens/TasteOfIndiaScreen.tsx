@@ -94,7 +94,6 @@ export const TasteOfIndiaScreen = () => {
     }
     actions.closeState();
   }, [actions]);
-  const panStartX = useSharedValue(0);
   const panStartY = useSharedValue(0);
   const panBounds = useSharedValue({ minX: 0, maxX: 0, minY: 0, maxY: 0 });
   const { selectedState, selectedDish } = state;
@@ -120,6 +119,8 @@ export const TasteOfIndiaScreen = () => {
       obstruction,
       scale: target.scale,
       restX: target.translateX,
+      restY: target.translateY,
+      locked: !selectedState,
       markerTop,
       markerBottom,
     });
@@ -138,22 +139,19 @@ export const TasteOfIndiaScreen = () => {
   ]);
 
   const panGesture = Gesture.Pan()
+    // Drag only while a state is selected; taps on markers/states are unaffected.
+    .enabled(selectedState != null)
     .minDistance(8)
     .onStart(() => {
       'worklet';
       scheduleOnRN(markPan, true);
-      cancelAnimation(sceneTranslateX);
+      // Vertical-only drag: leave sceneTranslateX (and its focus animation) alone.
       cancelAnimation(sceneTranslateY);
-      panStartX.value = sceneTranslateX.value;
       panStartY.value = sceneTranslateY.value;
     })
     .onUpdate(event => {
       'worklet';
       const bounds = panBounds.value;
-      sceneTranslateX.value = Math.min(
-        bounds.maxX,
-        Math.max(bounds.minX, panStartX.value + event.translationX),
-      );
       sceneTranslateY.value = Math.min(
         bounds.maxY,
         Math.max(bounds.minY, panStartY.value + event.translationY),
@@ -166,10 +164,6 @@ export const TasteOfIndiaScreen = () => {
     .onEnd(event => {
       'worklet';
       const bounds = panBounds.value;
-      sceneTranslateX.value = withDecay({
-        velocity: event.velocityX,
-        clamp: [bounds.minX, bounds.maxX],
-      });
       sceneTranslateY.value = withDecay({
         velocity: event.velocityY,
         clamp: [bounds.minY, bounds.maxY],

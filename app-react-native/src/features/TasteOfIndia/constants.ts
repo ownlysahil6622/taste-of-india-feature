@@ -48,10 +48,17 @@ export const TASTE_OF_INDIA_MAP_SIZE = 461;
 export const TASTE_OF_INDIA_MAP_TOP = 182;
 export const TASTE_OF_INDIA_MAP_CENTER_OFFSET = 14.5;
 
-export const TASTE_OF_INDIA_FOCUS_SCALE = 1.05;
+// Lowered from 1.05 so every marker + label fits a 390pt screen with
+// TASTE_OF_INDIA_FOCUS_CONTENT_EDGE_MARGIN on both sides.
+export const TASTE_OF_INDIA_FOCUS_SCALE = 1.03;
+// Horizontal span of all markers + labels on the 390pt design frame
+// (Maharashtra label on the left, West Bengal label on the right).
+export const TASTE_OF_INDIA_FOCUS_CONTENT_LEFT = 13;
+export const TASTE_OF_INDIA_FOCUS_CONTENT_RIGHT = 376;
+export const TASTE_OF_INDIA_FOCUS_CONTENT_EDGE_MARGIN = 8;
 export const TASTE_OF_INDIA_FOCUS_BOTTOM_GAP = 96;
-export const TASTE_OF_INDIA_PAN_RANGE_X = 120;
 export const TASTE_OF_INDIA_PAN_EDGE_MARGIN = 100;
+export const TASTE_OF_INDIA_MAX_VERTICAL_DRAG = 80;
 export const TASTE_OF_INDIA_SCENE_PAD_X = 400;
 export const TASTE_OF_INDIA_SCENE_PAD_Y = 900;
 export const TASTE_OF_INDIA_SHEET_DISMISS_DISTANCE = 80;
