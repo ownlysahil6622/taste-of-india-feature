@@ -6,8 +6,6 @@ import {
   useWindowDimensions,
   type LayoutChangeEvent,
 } from 'react-native';
-import { BlurView } from '@sbaiahmed1/react-native-blur';
-import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -21,42 +19,29 @@ import Animated, {
 
 import { TASTE_OF_INDIA_EASING } from '../../animation';
 import {
-  TASTE_OF_INDIA_BACK_BUTTON_LEFT,
-  TASTE_OF_INDIA_BACK_BUTTON_SIZE,
   TASTE_OF_INDIA_COLORS,
   TASTE_OF_INDIA_SCENE_PAD_X,
   TASTE_OF_INDIA_SCENE_PAD_Y,
-  TASTE_OF_INDIA_HEADER_BLUR_AMOUNT,
-  TASTE_OF_INDIA_HEADER_BLUR_HEIGHT,
-  TASTE_OF_INDIA_HEADER_GLASS_TINT,
   TASTE_OF_INDIA_MAP_CENTER_OFFSET,
   TASTE_OF_INDIA_MAP_SIZE,
   TASTE_OF_INDIA_MAP_TOP,
   TASTE_OF_INDIA_SCENE_DURATION_MS,
 } from '../../constants';
-import { useTasteOfIndiaBackButtonTop } from '../../hooks';
+import { useTasteOfIndiaMapHeaderLayout } from '../../hooks';
 import { computeMapFocus, computeMapPanBounds } from '../../layout';
 import type { TasteOfIndiaState } from '../../types';
 import { useTasteOfIndiaViewModel } from '../../vm/useTasteOfIndiaViewModel';
 import { TasteOfIndiaDishDetail } from '../components/TasteOfIndiaDishDetail';
 import { TasteOfIndiaDiscoveryTip } from '../components/TasteOfIndiaDiscoveryTip';
 import { TasteOfIndiaHitAreas } from '../components/TasteOfIndiaHitAreas';
-import { TasteOfIndiaImage } from '../components/TasteOfIndiaImage';
 import { TasteOfIndiaMapHeader } from '../components/TasteOfIndiaMapHeader';
 import { TasteOfIndiaMapLayers } from '../components/TasteOfIndiaMapLayers';
 import { TasteOfIndiaStateMarker } from '../components/TasteOfIndiaStateMarker';
 import { TasteOfIndiaStateSheet } from '../components/TasteOfIndiaStateSheet';
 
-const BACK_ICON_KEY = '916b0.svg';
-
 export const TasteOfIndiaScreen = () => {
   const { state, actions } = useTasteOfIndiaViewModel();
-  const [titleCenter, setTitleCenter] = useState<number | null>(null);
-  const fallbackBackTop = useTasteOfIndiaBackButtonTop();
-  const backTop =
-    titleCenter === null
-      ? fallbackBackTop
-      : titleCenter - TASTE_OF_INDIA_BACK_BUTTON_SIZE / 2;
+  const { height: headerHeight } = useTasteOfIndiaMapHeaderLayout();
   const insets = useSafeAreaInsets();
   const window = useWindowDimensions();
   const [size, setSize] = useState({
@@ -67,7 +52,6 @@ export const TasteOfIndiaScreen = () => {
   const sceneScale = useSharedValue(1);
   const sceneTranslateX = useSharedValue(0);
   const sceneTranslateY = useSharedValue(0);
-  const blurOpacity = useSharedValue(0);
   const panActiveRef = useRef(false);
   const panEndedAtRef = useRef(0);
   const markPan = useCallback((active: boolean) => {
@@ -112,7 +96,6 @@ export const TasteOfIndiaScreen = () => {
     sceneScale.value = withTiming(target.scale, timing);
     sceneTranslateX.value = withTiming(target.translateX, timing);
     sceneTranslateY.value = withTiming(target.translateY, timing);
-    blurOpacity.value = withTiming(selectedState ? 1 : 0, timing);
     panBounds.value = computeMapPanBounds({
       width: size.width,
       height: size.height,
@@ -121,6 +104,7 @@ export const TasteOfIndiaScreen = () => {
       restX: target.translateX,
       restY: target.translateY,
       locked: !selectedState,
+      headerHeight,
       markerTop,
       markerBottom,
     });
@@ -132,10 +116,10 @@ export const TasteOfIndiaScreen = () => {
     sceneScale,
     sceneTranslateX,
     sceneTranslateY,
-    blurOpacity,
     panBounds,
     markerTop,
     markerBottom,
+    headerHeight,
   ]);
 
   const panGesture = Gesture.Pan()
@@ -177,8 +161,6 @@ export const TasteOfIndiaScreen = () => {
       { scale: sceneScale.value },
     ],
   }));
-
-  const blurStyle = useAnimatedStyle(() => ({ opacity: blurOpacity.value }));
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -246,35 +228,12 @@ export const TasteOfIndiaScreen = () => {
           </View>
         </Animated.View>
       </GestureDetector>
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.headerGlass, blurStyle]}
-      >
-        <BlurView
-          style={StyleSheet.absoluteFill}
-          blurType="light"
-          blurAmount={TASTE_OF_INDIA_HEADER_BLUR_AMOUNT}
-          reducedTransparencyFallbackColor={TASTE_OF_INDIA_COLORS.shell}
-        />
-        <LinearGradient
-          style={StyleSheet.absoluteFill}
-          colors={TASTE_OF_INDIA_HEADER_GLASS_TINT}
-        />
-      </Animated.View>
-      <TasteOfIndiaMapHeader onTitleCenterChange={setTitleCenter} />
-      <Pressable
-        style={[styles.backAction, { top: backTop }]}
-        onPress={actions.handleBackAction}
-        accessibilityRole="button"
-        accessibilityLabel={selectedState ? 'Close state details' : 'Go back'}
-      >
-        <View style={styles.backIcon}>
-          <TasteOfIndiaImage
-            assetKey={BACK_ICON_KEY}
-            style={StyleSheet.absoluteFill}
-          />
-        </View>
-      </Pressable>
+      <TasteOfIndiaMapHeader
+        onBack={actions.handleBackAction}
+        backAccessibilityLabel={
+          selectedState ? 'Close state details' : 'Go back'
+        }
+      />
       {selectedState ? null : (
         <TasteOfIndiaDiscoveryTip onHeightChange={setObstruction} />
       )}
@@ -316,30 +275,10 @@ const styles = StyleSheet.create({
     top: TASTE_OF_INDIA_SCENE_PAD_Y,
     left: TASTE_OF_INDIA_SCENE_PAD_X,
   },
-  headerGlass: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: TASTE_OF_INDIA_HEADER_BLUR_HEIGHT,
-    overflow: 'hidden',
-  },
   map: {
     position: 'absolute',
     top: TASTE_OF_INDIA_MAP_TOP,
     width: TASTE_OF_INDIA_MAP_SIZE,
     height: TASTE_OF_INDIA_MAP_SIZE,
   },
-  backAction: {
-    position: 'absolute',
-    left: TASTE_OF_INDIA_BACK_BUTTON_LEFT,
-    zIndex: 20,
-    width: TASTE_OF_INDIA_BACK_BUTTON_SIZE,
-    height: TASTE_OF_INDIA_BACK_BUTTON_SIZE,
-    borderRadius: TASTE_OF_INDIA_BACK_BUTTON_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: TASTE_OF_INDIA_COLORS.detailBackScrim,
-  },
-  backIcon: { width: 24, height: 24 },
 });

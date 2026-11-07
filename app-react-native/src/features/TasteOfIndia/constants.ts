@@ -15,6 +15,9 @@ export const TASTE_OF_INDIA_COLORS = {
   textPrimary: '#333333',
   textSecondary: '#5D5D5D',
   textMuted: '#949494',
+  headerTitle: '#1A1A1A',
+  headerSubtitle: '#6B6B6B',
+  headerDivider: '#EFEFEF',
   titleAccent: '#9A0040',
   detailAccent: '#C00050',
   detailHero: '#FFB3D6',
@@ -64,8 +67,14 @@ export const TASTE_OF_INDIA_SCENE_PAD_Y = 900;
 export const TASTE_OF_INDIA_SHEET_DISMISS_DISTANCE = 80;
 export const TASTE_OF_INDIA_SHEET_DISMISS_VELOCITY = 800;
 export const TASTE_OF_INDIA_SHEET_DISMISS_DURATION_MS = 220;
-export const TASTE_OF_INDIA_HEADER_BLUR_HEIGHT = 132;
-export const TASTE_OF_INDIA_HEADER_BLUR_AMOUNT = 12;
+// Fixed white map header. Total height = max(MIN_TOP, safe-area top) + CONTENT_HEIGHT
+// (108pt with the minimum top, matching HEADER_HEIGHT in the web prototype).
+export const TASTE_OF_INDIA_HEADER_MIN_TOP = 40;
+export const TASTE_OF_INDIA_HEADER_CONTENT_HEIGHT = 68;
+export const TASTE_OF_INDIA_HEADER_PADDING_BOTTOM = 12;
+export const TASTE_OF_INDIA_HEADER_PADDING_X = 20;
+export const TASTE_OF_INDIA_HEADER_GAP = 16;
+export const TASTE_OF_INDIA_HEADER_BACK_SIZE = 44;
 export const TASTE_OF_INDIA_SCENE_DURATION_MS = 520;
 export const TASTE_OF_INDIA_DISCOVERY_TIP_DURATION_MS = 420;
 export const TASTE_OF_INDIA_BOTTOM_SHEET_DURATION_MS = 520;
@@ -83,10 +92,6 @@ export const TASTE_OF_INDIA_MARKER_SHADOW_GRADIENT =
 export const TASTE_OF_INDIA_DISH_SHADOW_GRADIENT =
   'radial-gradient(ellipse closest-side, rgba(28, 0, 11, 0.38) 0%, rgba(28, 0, 11, 0.22) 55%, rgba(28, 0, 11, 0) 100%)';
 
-export const TASTE_OF_INDIA_BACK_BUTTON_MIN_TOP = 36;
-export const TASTE_OF_INDIA_BACK_BUTTON_SIZE = 36;
-export const TASTE_OF_INDIA_BACK_BUTTON_LEFT = 20;
-
 export const TASTE_OF_INDIA_COLLECTION_BACK_TOP_GAP = 10;
 export const TASTE_OF_INDIA_COLLECTION_BACK_LEFT = 12;
 export const TASTE_OF_INDIA_BANNER_ASPECT_RATIO = 39 / 34;
@@ -95,10 +100,6 @@ export const TASTE_OF_INDIA_BACK_ICON_COLOR = '#111111';
 
 export const TASTE_OF_INDIA_MAP_ART_BOTTOM = 636;
 export const TASTE_OF_INDIA_SHEET_MAX_HEIGHT_RATIO = 0.5;
-export const TASTE_OF_INDIA_HEADER_GLASS_TINT = [
-  'rgba(255, 245, 250, 0.72)',
-  'rgba(255, 245, 250, 0.38)',
-];
 
 export const TASTE_OF_INDIA_DISH_OVERLAY_COLORS = [
   'rgba(14, 14, 14, 0)',

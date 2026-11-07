@@ -237,24 +237,55 @@
   color: #fff !important;
 }
 
-.back-action {
+.map-header {
   position: absolute;
   z-index: 20;
-  top: 36px;
-  left: 20px;
-  display: grid;
-  width: 36px;
-  height: 36px;
-  padding: 6px;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: rgb(0 0 0 / 0.4);
+  top: 0;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  display: flex;
+  height: 108px; /* HEADER_HEIGHT in App.tsx */
+  align-items: center;
+  gap: 16px;
+  padding: 40px 20px 12px;
+  border-bottom: 1px solid #efefef;
+  background: #fff;
 }
 
-.back-action img {
-  width: 24px;
-  height: 24px;
+.back-action {
+  display: grid;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #e8e8e8;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.map-header-text {
+  min-width: 0;
+  text-align: left;
+}
+
+.map-header-text h1 {
+  margin: 0;
+  color: #1a1a1a;
+  font-family: 'Figtree', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+}
+
+.map-header-text p {
+  margin: 2px 0 0;
+  color: #6b6b6b;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
 }
 
 .map-artwork [data-node-id='2693:293'] {
@@ -880,41 +911,6 @@
   font-family: 'Figtree', sans-serif;
   font-size: 14px;
   line-height: 20px;
-}
-
-.map-world [data-node-id='2872:4597'] {
-  display: none;
-}
-
-.heading-only {
-  z-index: 3;
-}
-
-.heading-only > div {
-  background: transparent !important;
-}
-
-.heading-only div:has(> [data-node-id='2872:4597']) > :not([data-node-id='2872:4597']) {
-  display: none;
-}
-
-.heading-glass {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: 132px;
-  pointer-events: none;
-  opacity: 0;
-  background: linear-gradient(to bottom, rgb(255 245 250 / 0.72), rgb(255 245 250 / 0.38));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.is-selected .heading-glass {
-  opacity: 1;
 }
 
 .scene-transform,

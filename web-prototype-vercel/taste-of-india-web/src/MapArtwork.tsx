@@ -47,8 +47,6 @@ const imgEllipse1 = `${assetPathPrefix}/35619.svg`;
 const imgUnion = `${assetPathPrefix}/393d0.svg`;
 const imgUnion1 = `${assetPathPrefix}/ebcb8.svg`;
 const imgUnion2 = `${assetPathPrefix}/b472e.svg`;
-const imgGroup1410134799 = `${assetPathPrefix}/f6c50.svg`;
-const imgGroup1410134800 = `${assetPathPrefix}/5e624.svg`;
 const imgArrowLeftAlt = `${assetPathPrefix}/916b0.svg`;
 
 const selectedStateAssets: Record<string, string> = {
@@ -942,30 +940,6 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
             </div>
           </div>
         </div>
-      </div>
-      <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[4px] items-center left-[calc(50%+0.5px)] top-[66px] w-[247px]" data-node-id="2872:4597">
-        <div className="content-stretch flex gap-[5px] items-center justify-center relative shrink-0 w-full" data-node-id="2872:4598">
-          <div className="flex items-center justify-center relative shrink-0" data-node-id="2872:4599">
-            <div className="-scale-y-100 flex-none rotate-180">
-              <div className="h-[19px] relative w-[29.365px]">
-                <div className="absolute inset-[-1.55%_-1.01%_0_-1%]">
-                  <img alt="" className="block max-w-none size-full" src={imgGroup1410134799} />
-                </div>
-              </div>
-            </div>
-          </div>
-          <p className="[word-break:break-word] font-['Gloock'] leading-[normal] not-italic relative shrink-0 text-[#9a0040] text-[24px] text-center tracking-[0.48px] whitespace-nowrap" data-node-id="2872:4603" style={{ fontFeatureSettings: '"dlig" 1' }}>
-            Taste of India
-          </p>
-          <div className="h-[19px] relative shrink-0 w-[29.365px]" data-node-id="2872:4604">
-            <div className="absolute inset-[-1.55%_-1.01%_0_-1%]">
-              <img alt="" className="block max-w-none size-full" src={imgGroup1410134800} />
-            </div>
-          </div>
-        </div>
-        <p className="[word-break:break-word] font-['Figtree'] font-normal leading-[normal] relative shrink-0 text-[#333] text-[16px] text-center tracking-[0.32px] whitespace-nowrap" data-node-id="2872:4608" style={{ fontFeatureSettings: '"dlig" 1' }}>
-          Explore Cuisines by state
-        </p>
       </div>
       <div className="-translate-x-1/2 absolute bg-white border border-[#e8e8e8] border-solid bottom-0 content-stretch flex flex-col gap-[6px] items-center left-1/2 overflow-clip pb-[16px] pt-[6px] px-[12px] rounded-tl-[20px] rounded-tr-[20px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] w-[390px]" data-node-id="2683:133">
         <div className="bg-[#f3f3f3] h-[5px] relative rounded-[999px] shrink-0 w-[36px]" data-node-id="2683:134" />

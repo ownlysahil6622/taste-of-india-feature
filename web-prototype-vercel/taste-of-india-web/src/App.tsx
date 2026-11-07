@@ -161,8 +161,8 @@ const CONTENT_EDGE_MARGIN = 8;
 // CONTENT_EDGE_MARGIN on both sides (1.05 left under 5px).
 const FOCUS_SCALE = 1.03;
 const FOCUS_BOTTOM_GAP = 96;
-const BACK_BUTTON_SIZE = 36;
-const HEADER_BLUR_HEIGHT = 132;
+// Height of the fixed white header (must match .map-header in index.css).
+const HEADER_HEIGHT = 108;
 const MAP_TOP = 182;
 const DRAG_THRESHOLD = 8;
 const PAN_EDGE_MARGIN = 100;
@@ -195,7 +195,7 @@ function computeMapPanBounds(height: number, obstruction: number, scale: number,
   if (locked) return { minX: restX, maxX: restX, minY: restY, maxY: restY };
   const visibleBottom = height - obstruction;
   const markerYs = states.map((item) => item.marker.y);
-  const markerMinY = HEADER_BLUR_HEIGHT + PAN_EDGE_MARGIN - scale * Math.max(...markerYs);
+  const markerMinY = HEADER_HEIGHT + PAN_EDGE_MARGIN - scale * Math.max(...markerYs);
   const markerMaxY = visibleBottom - PAN_EDGE_MARGIN - scale * Math.min(...markerYs);
   // Use whichever limit is tighter: the marker limits or MAX_VERTICAL_DRAG from rest.
   let minY = Math.max(markerMinY, restY - MAX_VERTICAL_DRAG);
@@ -433,9 +433,7 @@ export default function App() {
   const [markerPulse, setMarkerPulse] = useState(0);
   const [obstruction, setObstruction] = useState(0);
   const shellRef = useRef<HTMLElement>(null);
-  const headingRef = useRef<HTMLDivElement>(null);
   const [shellSize, setShellSize] = useState({ width: 390, height: window.innerHeight });
-  const [titleCenter, setTitleCenter] = useState<number | null>(null);
   const [pan, setPan] = useState({ x: 0, y: 0 }); // pan.x stays 0: vertical drag only
   const [dragging, setDragging] = useState(false);
   const dragRef = useRef<{ id: number; startX: number; startY: number; panY: number; active: boolean } | null>(null);
@@ -449,15 +447,8 @@ export default function App() {
       setShellSize((current) =>
         current.width === rect.width && current.height === rect.height ? current : { width: rect.width, height: rect.height },
       );
-      const title = headingRef.current?.querySelector<HTMLElement>("[data-node-id='2872:4598']");
-      if (title) {
-        const titleRect = title.getBoundingClientRect();
-        const center = titleRect.top - rect.top + titleRect.height / 2;
-        setTitleCenter((current) => (current !== null && Math.abs(current - center) < 0.5 ? current : center));
-      }
     };
     measure();
-    document.fonts?.ready.then(measure);
     const observer = new ResizeObserver(measure);
     observer.observe(shell);
     return () => observer.disconnect();
@@ -496,7 +487,7 @@ export default function App() {
 
   const handleShellClick = (event: ReactMouseEvent<HTMLElement>) => {
     if (!selected || justDraggedRef.current) return;
-    if ((event.target as HTMLElement).closest(".bottom-sheet, .back-action, path, button")) return;
+    if ((event.target as HTMLElement).closest(".bottom-sheet, .map-header, path, button")) return;
     setSelected(null);
   };
 
@@ -599,19 +590,22 @@ export default function App() {
         </div>
       </div>
 
-      <div className="heading-glass" aria-hidden="true" />
-      <div ref={headingRef} className="map-artwork heading-only" aria-hidden="true">
-        <MapArtwork />
-      </div>
-
-      <button
-        className="back-action"
-        style={titleCenter === null ? undefined : { top: titleCenter - BACK_BUTTON_SIZE / 2 }}
-        onClick={() => selected && setSelected(null)}
-        aria-label={selected ? "Close state details" : "Go back"}
-      >
-        <img src="/assets/916b0.svg" alt="" />
-      </button>
+      <header className="map-header">
+        <button
+          className="back-action"
+          onClick={() => selected && setSelected(null)}
+          aria-label={selected ? "Close state details" : "Go back"}
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <div className="map-header-text">
+          <h1>Taste of India</h1>
+          <p>Explore cuisines by state</p>
+        </div>
+      </header>
 
       {!selected && (
         <DiscoveryTip onHeight={setObstruction} />

@@ -6,7 +6,6 @@ import {
   TASTE_OF_INDIA_FOCUS_CONTENT_LEFT,
   TASTE_OF_INDIA_FOCUS_CONTENT_RIGHT,
   TASTE_OF_INDIA_FOCUS_SCALE,
-  TASTE_OF_INDIA_HEADER_BLUR_HEIGHT,
   TASTE_OF_INDIA_MAP_TOP,
   TASTE_OF_INDIA_MAP_ART_BOTTOM,
   TASTE_OF_INDIA_MAP_CENTER_OFFSET,
@@ -97,6 +96,7 @@ type MapPanBoundsInput = {
   restX: number;
   restY: number;
   locked: boolean;
+  headerHeight: number;
   markerTop: number;
   markerBottom: number;
 };
@@ -109,6 +109,7 @@ export const computeMapPanBounds = ({
   restX,
   restY,
   locked,
+  headerHeight,
   markerTop,
   markerBottom,
 }: MapPanBoundsInput) => {
@@ -118,9 +119,7 @@ export const computeMapPanBounds = ({
   }
   const visibleBottom = height - obstruction;
   const markerMinY =
-    TASTE_OF_INDIA_HEADER_BLUR_HEIGHT +
-    TASTE_OF_INDIA_PAN_EDGE_MARGIN -
-    scale * markerBottom;
+    headerHeight + TASTE_OF_INDIA_PAN_EDGE_MARGIN - scale * markerBottom;
   const markerMaxY =
     visibleBottom - TASTE_OF_INDIA_PAN_EDGE_MARGIN - scale * markerTop;
   // Use whichever limit is tighter: the marker limits or

@@ -1,100 +1,99 @@
+import { ResponsiveIconSizes } from '@assets/icons';
+import Icon from '@components/global/Icon';
 import React, { memo } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { TASTE_OF_INDIA_COLORS, TASTE_OF_INDIA_FONTS } from '../../constants';
-import { resolveInsetStyle } from '../../layout';
-import { TasteOfIndiaImage } from './TasteOfIndiaImage';
+import {
+  TASTE_OF_INDIA_COLORS,
+  TASTE_OF_INDIA_FONTS,
+  TASTE_OF_INDIA_HEADER_BACK_SIZE,
+  TASTE_OF_INDIA_HEADER_GAP,
+  TASTE_OF_INDIA_HEADER_PADDING_BOTTOM,
+  TASTE_OF_INDIA_HEADER_PADDING_X,
+} from '../../constants';
+import { useTasteOfIndiaMapHeaderLayout } from '../../hooks';
 import { TasteOfIndiaText } from './TasteOfIndiaText';
 
-const HEADER_TOP = 66;
-const ORNAMENT_LEFT_KEY = 'f6c50.svg';
-const ORNAMENT_RIGHT_KEY = '5e624.svg';
-
-const Ornament = ({
-  assetKey,
-  mirrored,
-}: {
-  assetKey: string;
-  mirrored?: boolean;
-}) => (
-  <View style={[styles.ornament, mirrored ? styles.mirrored : null]}>
-    <View style={styles.ornamentImageBox}>
-      <TasteOfIndiaImage assetKey={assetKey} style={styles.fill} />
-    </View>
-  </View>
-);
-
 type TasteOfIndiaMapHeaderProps = {
-  onTitleCenterChange?: (centerY: number) => void;
+  onBack: () => void;
+  backAccessibilityLabel: string;
 };
 
+// Fixed, solid white header drawn above the map: back button + title/subtitle.
 export const TasteOfIndiaMapHeader = memo(function TasteOfIndiaMapHeader({
-  onTitleCenterChange,
+  onBack,
+  backAccessibilityLabel,
 }: TasteOfIndiaMapHeaderProps) {
-  const handleTitleRowLayout = ({ nativeEvent }: LayoutChangeEvent) => {
-    onTitleCenterChange?.(
-      HEADER_TOP + nativeEvent.layout.y + nativeEvent.layout.height / 2,
-    );
-  };
+  const { top, height } = useTasteOfIndiaMapHeaderLayout();
 
   return (
-    <>
-      <View pointerEvents="none" style={styles.titleAnchor}>
-        <View style={styles.titleBlock}>
-          <View style={styles.titleRow} onLayout={handleTitleRowLayout}>
-            <Ornament assetKey={ORNAMENT_LEFT_KEY} mirrored />
-            <TasteOfIndiaText style={styles.title}>
-              Taste of India
-            </TasteOfIndiaText>
-            <Ornament assetKey={ORNAMENT_RIGHT_KEY} />
-          </View>
-          <TasteOfIndiaText style={styles.subtitle}>
-            Explore Cuisines by state
-          </TasteOfIndiaText>
-        </View>
+    <View style={[styles.header, { height, paddingTop: top }]}>
+      <Pressable
+        style={styles.back}
+        onPress={onBack}
+        accessibilityRole="button"
+        accessibilityLabel={backAccessibilityLabel}
+      >
+        <Icon
+          iconFamily="svg"
+          name="arrow_back"
+          size={ResponsiveIconSizes.md}
+          color={TASTE_OF_INDIA_COLORS.black}
+        />
+      </Pressable>
+      <View style={styles.text}>
+        <TasteOfIndiaText style={styles.title} numberOfLines={1}>
+          Taste of India
+        </TasteOfIndiaText>
+        <TasteOfIndiaText style={styles.subtitle} numberOfLines={1}>
+          Explore cuisines by state
+        </TasteOfIndiaText>
       </View>
-    </>
+    </View>
   );
 });
 
 const styles = StyleSheet.create({
-  fill: StyleSheet.absoluteFill,
-  titleAnchor: {
+  header: {
     position: 'absolute',
-    top: HEADER_TOP,
+    top: 0,
     left: 0,
     right: 0,
-    alignItems: 'center',
-  },
-  titleBlock: {
-    gap: 4,
-    alignItems: 'center',
-  },
-  titleRow: {
+    zIndex: 20,
     flexDirection: 'row',
-    gap: 5,
+    alignItems: 'center',
+    gap: TASTE_OF_INDIA_HEADER_GAP,
+    paddingHorizontal: TASTE_OF_INDIA_HEADER_PADDING_X,
+    paddingBottom: TASTE_OF_INDIA_HEADER_PADDING_BOTTOM,
+    backgroundColor: TASTE_OF_INDIA_COLORS.white,
+    borderBottomWidth: 1,
+    borderBottomColor: TASTE_OF_INDIA_COLORS.headerDivider,
+  },
+  back: {
+    width: TASTE_OF_INDIA_HEADER_BACK_SIZE,
+    height: TASTE_OF_INDIA_HEADER_BACK_SIZE,
+    borderRadius: TASTE_OF_INDIA_HEADER_BACK_SIZE / 2,
+    borderWidth: 1,
+    borderColor: TASTE_OF_INDIA_COLORS.border,
+    backgroundColor: TASTE_OF_INDIA_COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ornament: { width: 29.365, height: 19 },
-  mirrored: { transform: [{ scaleX: -1 }] },
-  ornamentImageBox: resolveInsetStyle(
-    ['-1.55%', '-1.01%', '0%', '-1%'],
-    29.365,
-    19,
-  ),
+  text: {
+    flex: 1,
+    minWidth: 0,
+  },
   title: {
-    fontFamily: TASTE_OF_INDIA_FONTS.display,
-    fontSize: 24,
-    letterSpacing: 0.48,
-    textAlign: 'center',
-    color: TASTE_OF_INDIA_COLORS.titleAccent,
+    fontFamily: TASTE_OF_INDIA_FONTS.bold,
+    fontSize: 16,
+    lineHeight: 22,
+    color: TASTE_OF_INDIA_COLORS.headerTitle,
   },
   subtitle: {
-    fontFamily: TASTE_OF_INDIA_FONTS.regular,
-    fontSize: 16,
-    letterSpacing: 0.32,
-    textAlign: 'center',
-    color: TASTE_OF_INDIA_COLORS.textPrimary,
+    marginTop: 2,
+    fontFamily: TASTE_OF_INDIA_FONTS.medium,
+    fontSize: 14,
+    lineHeight: 18,
+    color: TASTE_OF_INDIA_COLORS.headerSubtitle,
   },
 });
