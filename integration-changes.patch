@@ -1,0 +1,280 @@
+diff --git a/ios/Podfile.lock b/ios/Podfile.lock
+index 5a2b4ed..fb0007c 100644
+--- a/ios/Podfile.lock
++++ b/ios/Podfile.lock
+@@ -4586,7 +4586,10 @@ PODS:
+     - SocketRocket
+     - Yoga
+   - WatermelonDB (0.28.0):
++    - hermes-engine
+     - React
++    - React-jsi
++    - React-NativeModulesApple
+     - simdjson
+   - Yoga (0.0.0)
+   - ZIPFoundation (0.9.20)
+@@ -5149,7 +5152,7 @@ SPEC CHECKSUMS:
+   react-native-contacts: 94f5e5fbbfaff76395dacc0a739f61c9199dbdbc
+   react-native-document-picker: 581bf17df84b483368b2c3e6a6b4ee9fc5d3ad58
+   react-native-geolocation: 35807baccadced59d5f7dc6968fe08fceca24370
+-  react-native-image-picker: cd9b4f5047c358dd913e1373334b52c749405ee7
++  react-native-image-picker: f1dbaacf140508c0d97641587d34faa2a9efc787
+   react-native-in-app-review: bb863fb300f2c716479c4285201df746cf5e20a2
+   react-native-incognia: dc4dec09d6be42b6e4b87ced3df079491f0dd589
+   react-native-keyboard-controller: 55ae405beb0e19c3bcc93ed6c6b5ab748b394e58
+@@ -5217,7 +5220,7 @@ SPEC CHECKSUMS:
+   RNRive: 87f311235bb2fa6847af09c082bc647b8b2edeef
+   RNScreens: 18694f22a3ce95a50756cc7e2321d827c71e001d
+   RNShare: 94b727d1cf760dfd31b84fb0cf3d5f915f24450e
+-  RNSound: 4cb96f7f453b176bb40e40f7889701783c6e79db
++  RNSound: 928bc1842605272f3ce713b90fa8303f6b2470b9
+   RNSVG: 7bac801635658f912a3df8b31f912459e9de8943
+   RNVectorIcons: e86cf9af1a0145294bf2a253e260cf5c779ec925
+   RNWorklets: 081044061b356faf9152a1d811e4e2b8abce8739
+@@ -5228,10 +5231,10 @@ SPEC CHECKSUMS:
+   simdjson: 7bb9e33d87737cec966e7b427773c67baa4458fe
+   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
+   Unistyles: 668a71e6ea744be83283bcf9e1128cd0f23e9073
+-  WatermelonDB: 8dafe8b8a23dc6d8e033e1086449b8e2638d9453
++  WatermelonDB: 13c405d7ad05d9a04dce7ac78fd01101a3426d06
+   Yoga: 58421dc4dc9c843ad112dceb5b337d4916d4deb7
+   ZIPFoundation: dfd3d681c4053ff7e2f7350bc4e53b5dba3f5351
+ 
+-PODFILE CHECKSUM: cbb26675b13f9b4223266192f615b81bab749b43
++PODFILE CHECKSUM: c2f27cef687305f60f88a26148de78ac0bd0add9
+ 
+ COCOAPODS: 1.17.0
+diff --git a/ios/consumerapp.xcodeproj/project.pbxproj b/ios/consumerapp.xcodeproj/project.pbxproj
+index 4f3d31e..62f3a61 100644
+--- a/ios/consumerapp.xcodeproj/project.pbxproj
++++ b/ios/consumerapp.xcodeproj/project.pbxproj
+@@ -297,7 +297,7 @@
+ 			);
+ 			runOnlyForDeploymentPostprocessing = 0;
+ 			shellPath = /bin/sh;
+-			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
++			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"\\\"$WITH_ENVIRONMENT\\\" \\\"$REACT_NATIVE_XCODE\\\"\"\n";
+ 		};
+ 		29248510A057F79E6ECF150C /* [CP] Embed Pods Frameworks */ = {
+ 			isa = PBXShellScriptBuildPhase;
+diff --git a/patches/@nozbe+watermelondb+0.28.0.patch b/patches/@nozbe+watermelondb+0.28.0.patch
+index 23e843a..a27ab18 100644
+--- a/patches/@nozbe+watermelondb+0.28.0.patch
++++ b/patches/@nozbe+watermelondb+0.28.0.patch
+@@ -1,46 +1,69 @@
+ diff --git a/node_modules/@nozbe/watermelondb/WatermelonDB.podspec b/node_modules/@nozbe/watermelondb/WatermelonDB.podspec
++index c9d8b09..2b2295b 100644
+ --- a/node_modules/@nozbe/watermelondb/WatermelonDB.podspec
+ +++ b/node_modules/@nozbe/watermelondb/WatermelonDB.podspec
+-@@ -33,0 +34,3 @@
++@@ -30,6 +30,9 @@ Pod::Spec.new do |s|
++   # simdjson is annoyingly slow without compiler optimization, disable for debugging
++   s.compiler_flags = '-Os'
++ 
+ +  s.dependency "React-jsi"
+ +  s.dependency "React-NativeModulesApple"
+ +  s.dependency "hermes-engine" if defined?(use_hermes) && use_hermes()
+-diff --git a/node_modules/@nozbe/watermelondb/native/shared/Database.cpp b/node_modules/@nozbe/watermelondb/native/shared/Database.cpp
+---- a/node_modules/@nozbe/watermelondb/native/shared/Database.cpp
+-+++ b/node_modules/@nozbe/watermelondb/native/shared/Database.cpp
+-@@ -22,0 +23,4 @@
+-+    // busy_timeout must be set before journal_mode. WAL takes an exclusive lock,
+-+    // and a timeout set later does not cover that statement. iOS can open a new
+-+    // JS runtime while the previous connection is still closing.
+-+    initSql += "pragma busy_timeout = 5000;";
+-@@ -24,3 +27,0 @@
+--
+--    // set timeout before SQLITE_BUSY error is returned
+--    initSql += "pragma busy_timeout = 5000;";
++   s.dependency "React"
++ 
++   s.libraries = 'sqlite3'
++diff --git a/node_modules/@nozbe/watermelondb/native/android/build.gradle b/node_modules/@nozbe/watermelondb/native/android/build.gradle
++index a45cfe0..7ddae28 100644
++--- a/node_modules/@nozbe/watermelondb/native/android/build.gradle
+++++ b/node_modules/@nozbe/watermelondb/native/android/build.gradle
++@@ -21,6 +21,9 @@ apply plugin: 'com.android.library'
++ apply plugin: 'kotlin-android'
++ 
++ android {
+++    buildFeatures {
+++        buildConfig true
+++    }
++     compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
++     buildToolsVersion getExtOrDefault('buildToolsVersion')
++ 
+ diff --git a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.h b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.h
++index c1b7efb..3a33024 100644
+ --- a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.h
+ +++ b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.h
+-@@ -3 +3 @@
++@@ -1,13 +1,12 @@
++ #pragma once
++ 
+ -#import <React/RCTBridge+Private.h>
+ +#import <Foundation/Foundation.h>
+-@@ -10 +9,0 @@
++ 
++ #ifdef __cplusplus
++ extern "C"
++ {
++ #endif
++ 
+ -void installWatermelonJSI(RCTCxxBridge *bridge);
++ void watermelondbProvideSyncJson(int id, NSData *json, NSError **errorPtr);
++ 
++ #ifdef __cplusplus
+ diff --git a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.mm b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.mm
++index d508249..449d6dd 100644
+ --- a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.mm
+ +++ b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstaller.mm
+-@@ -2,0 +3,4 @@
++@@ -1,12 +1,23 @@
++ #import "JSIInstaller.h"
+ +#import "objc/WMDatabaseBridge.h"
+ +#import <ReactCommon/RCTInteropTurboModule.h>
+ +#import <ReactCommon/RCTTurboModule.h>
+ +#import <ReactCommon/RCTTurboModuleWithJSIBindings.h>
+-@@ -4,4 +8,2 @@
++ #import "Database.h"
++ 
+ -extern "C" void installWatermelonJSI(RCTCxxBridge *bridge) {
+ -    if (bridge.runtime == nullptr) {
+ -        return;
+ -    }
+ +@interface WMDatabaseBridge (JSIBindings) <RCTTurboModule, RCTTurboModuleWithJSIBindings>
+ +@end
+-@@ -9,3 +11,5 @@
++ 
+ -    jsi::Runtime *runtime = (jsi::Runtime*) bridge.runtime;
+ -    assert(runtime != nullptr);
+ -    watermelondb::Database::install(runtime);
+@@ -49,28 +72,47 @@ diff --git a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/JSIInstall
+ +- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+ +    (const facebook::react::ObjCTurboModule::InitParams &)params {
+ +    return std::make_shared<facebook::react::ObjCInteropTurboModule>(params);
+-@@ -12,0 +17,7 @@
+++}
+ +
+ +- (void)installJSIBindingsWithRuntime:(facebook::jsi::Runtime &)runtime
+ +    callInvoker:(const std::shared_ptr<facebook::react::CallInvoker> &)callInvoker {
+ +    watermelondb::Database::install(&runtime);
+-+}
++ }
+ +
+ +@end
+ diff --git a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabaseBridge.m b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabaseBridge.m
++index 8a3ab35..054473d 100644
+ --- a/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabaseBridge.m
+ +++ b/node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/objc/WMDatabaseBridge.m
+-@@ -199,4 +198,0 @@
++@@ -196,10 +196,6 @@ + (BOOL) requiresMainQueueSetup
++ 
++ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(initializeJSI)
++ {
+ -    __block RCTCxxBridge *bridge = (RCTCxxBridge *) _bridge;
+ -    dispatch_sync([self methodQueue], ^{
+ -        installWatermelonJSI(bridge);
+ -    });
+-diff --git a/node_modules/@nozbe/watermelondb/native/android/build.gradle b/node_modules/@nozbe/watermelondb/native/android/build.gradle
+---- a/node_modules/@nozbe/watermelondb/native/android/build.gradle
+-+++ b/node_modules/@nozbe/watermelondb/native/android/build.gradle
+-@@ -23,2 +23,5 @@
+- android {
+-+    buildFeatures {
+-+        buildConfig true
+-+    }
+-     compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
++     
++     return @YES;
++ }
++diff --git a/node_modules/@nozbe/watermelondb/native/shared/Database.cpp b/node_modules/@nozbe/watermelondb/native/shared/Database.cpp
++index 8a4e9b4..75b867a 100644
++--- a/node_modules/@nozbe/watermelondb/native/shared/Database.cpp
+++++ b/node_modules/@nozbe/watermelondb/native/shared/Database.cpp
++@@ -19,12 +19,13 @@ Database::Database(jsi::Runtime *runtime, std::string path, bool usesExclusiveLo
++     #ifdef ANDROID
++     initSql += "pragma temp_store = memory;";
++     #endif
+++    // busy_timeout must be set before journal_mode. WAL takes an exclusive lock,
+++    // and a timeout set later does not cover that statement. iOS can open a new
+++    // JS runtime while the previous connection is still closing.
+++    initSql += "pragma busy_timeout = 5000;";
++ 
++     initSql += "pragma journal_mode = WAL;";
++ 
++-    // set timeout before SQLITE_BUSY error is returned
++-    initSql += "pragma busy_timeout = 5000;";
++-
++     #ifdef ANDROID
++     // NOTE: This was added in an attempt to fix mysterious `database disk image is malformed` issue when using
++     // headless JS services
+diff --git a/src/features/Home/data/applyNovaServiceabilityPresentation.ts b/src/features/Home/data/applyNovaServiceabilityPresentation.ts
+index 628b88d..0b6b255 100644
+--- a/src/features/Home/data/applyNovaServiceabilityPresentation.ts
++++ b/src/features/Home/data/applyNovaServiceabilityPresentation.ts
+@@ -6,6 +6,7 @@ import {
+ import type { NovaComponentRow, NovaNormalizedResponse } from '@ownly/nova-core';
+ 
+ import type { ServiceabilityResponse } from '../../../services/serviceabilityService';
++import { injectTasteOfIndiaIngressRow } from './injectTasteOfIndiaIngressRow';
+ 
+ const buildServiceabilityBodyRow = (variant: ServiceabilityScreenVariant): NovaComponentRow => ({
+   key: `body:body_serviceability:serviceabilityScreen:${variant}:none`,
+@@ -29,7 +30,7 @@ export function applyNovaServiceabilityPresentation(
+   const showServiceabilityScreen = shouldShowHomeServiceabilityScreen(metaServiceability);
+   if (!showServiceabilityScreen) {
+     return {
+-      rowsByRegion: normalized.rowsByRegion,
++      rowsByRegion: injectTasteOfIndiaIngressRow(normalized.rowsByRegion),
+       showServiceabilityScreen: false,
+     };
+   }
+diff --git a/src/features/Home/nova/homeNovaRegistry.ts b/src/features/Home/nova/homeNovaRegistry.ts
+index cec1396..44f9586 100644
+--- a/src/features/Home/nova/homeNovaRegistry.ts
++++ b/src/features/Home/nova/homeNovaRegistry.ts
+@@ -11,6 +11,7 @@ import { restaurantRowEntries } from '../../nova/components/RestaurantRow';
+ import { searchBarEntries } from '../../nova/components/SearchBar';
+ import { serviceabilityScreenEntries } from '../../nova/components/ServiceabilityScreen';
+ import { spacerEntries } from '../../nova/components/Spacer';
++import { tasteOfIndiaIngressEntries } from '../../nova/components/TasteOfIndiaIngress';
+ import { topSectionEntries } from '../../nova/components/TopSection';
+ import { createNovaRegistry } from '../../nova/registry/createNovaRegistry';
+ 
+@@ -23,6 +24,7 @@ export const homeNovaRegistry = createNovaRegistry([
+   ...topSectionEntries,
+   ...spacerEntries,
+   ...bannerCardEntries,
++  ...tasteOfIndiaIngressEntries,
+   ...foodItemRowEntries,
+   ...restaurantRowEntries,
+   ...categoryRowEntries,
+diff --git a/src/navigation/Navigation.tsx b/src/navigation/Navigation.tsx
+index 51faf4b..d315367 100644
+--- a/src/navigation/Navigation.tsx
++++ b/src/navigation/Navigation.tsx
+@@ -25,6 +25,7 @@ import LoginScreen from '../features/auth/LoginScreen';
+ import OnboardingScreen from '../features/auth/OnboardingScreen';
+ import SplashScreen from '../features/auth/SplashScreen';
+ import HomePage from '../features/Home/screens/HomePage';
++import { TasteOfIndiaScreen } from '../features/TasteOfIndia';
+ import AddressesScreen from '../features/location/AddressesScreen';
+ import LocationScreen from '../features/location/LocationScreen';
+ import LocationSearchScreen from '../features/location/LocationSearchScreen';
+@@ -89,6 +90,7 @@ const PastOrderHelpScreen = React.lazy(() => import('../features/help/ui/PastOrd
+ export type RootStackParamList = {
+   Home: { location?: Location; redirectToCart?: boolean; fromLocationFlow?: boolean };
+   Search: undefined;
++  TasteOfIndia: undefined;
+   SearchResults: {
+     entityType: string;
+     entityName: string;
+@@ -505,6 +507,7 @@ const Navigation: FC<NavigationProps> = ({ linking }) => {
+               component={OnboardingScreen}
+             />
+             <Stack.Screen name="Home" component={HomePage} />
++            <Stack.Screen name="TasteOfIndia" component={TasteOfIndiaScreen} />
+             <Stack.Screen name="Search" component={SearchPage} />
+             <Stack.Screen name="SearchResults" component={SearchResultsPage} />
+             <Stack.Screen

@@ -1,0 +1,937 @@
+@import 'tailwindcss';
+
+@layer base {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-height: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    background: #f1eef0;
+    color: #333;
+    font-family: 'Figtree', sans-serif;
+  }
+
+  button {
+    cursor: pointer;
+  }
+}
+
+.app-shell {
+  position: relative;
+  width: min(100%, 430px);
+  height: 100dvh;
+  overflow: hidden;
+  background: #fff7fb;
+}
+
+.scene-transform {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  transform-origin: 0 0;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.map-artwork {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.map-artwork > div {
+  border-radius: 0;
+  overflow: visible;
+}
+
+.map-artwork [data-node-id='2683:133'] {
+  display: none;
+}
+
+.state-hitboxes,
+.target-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.state-hitboxes path {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 0;
+  cursor: pointer;
+}
+
+.state-hitboxes path:hover,
+.state-hitboxes path:focus-visible {
+  fill: transparent;
+  stroke: transparent;
+  outline: none;
+}
+
+.target-layer {
+  pointer-events: none;
+}
+
+.target-layer button,
+.marker-hit-layer button {
+  position: absolute;
+  pointer-events: auto;
+  border: 0;
+  background: transparent;
+}
+
+.target-layer button:focus-visible {
+  border-radius: 18px;
+  outline: 2px solid #ff297d;
+  outline-offset: 2px;
+}
+
+.marker-hit-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.marker-hit-layer button {
+  width: 54px;
+  height: 54px;
+  transform: translate(-50%, -50%);
+  border-radius: 14px;
+}
+
+.marker-hit-layer button:focus-visible {
+  outline: 3px solid rgb(225 12 96 / 0.55);
+  outline-offset: 2px;
+}
+
+.map-artwork.marker-maharashtra [data-node-id='2642:2722'] > a,
+.map-artwork.marker-telangana [data-node-id='2642:2513'] > div:first-child,
+.map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:first-child,
+.map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:first-child,
+.map-artwork.marker-punjab [data-node-id='2642:2591'] > div:first-child,
+.map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:first-child,
+.map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:first-child,
+.map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:last-child,
+.map-artwork.marker-kerala [data-node-id='2642:2695'] > div:last-child {
+  transform-origin: 50% 70%;
+  animation: var(--marker-cluster-animation) 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.map-artwork.marker-pulse-0 {
+  --marker-cluster-animation: marker-cluster-bounce-a;
+  --marker-left-animation: marker-side-left-a;
+  --marker-right-animation: marker-side-right-a;
+}
+
+.map-artwork.marker-pulse-1 {
+  --marker-cluster-animation: marker-cluster-bounce-b;
+  --marker-left-animation: marker-side-left-b;
+  --marker-right-animation: marker-side-right-b;
+}
+
+:is(
+  .map-artwork.marker-maharashtra [data-node-id='2642:2722'] > a,
+  .map-artwork.marker-telangana [data-node-id='2642:2513'] > div:first-child,
+  .map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:first-child,
+  .map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:first-child,
+  .map-artwork.marker-punjab [data-node-id='2642:2591'] > div:first-child,
+  .map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:first-child,
+  .map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:first-child,
+  .map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:last-child,
+  .map-artwork.marker-kerala [data-node-id='2642:2695'] > div:last-child
+) [class*='bg-[#ff80b8]'] {
+  background: #e10c60 !important;
+}
+
+:is(
+  .map-artwork.marker-maharashtra [data-node-id='2642:2722'] > a,
+  .map-artwork.marker-telangana [data-node-id='2642:2513'] > div:first-child,
+  .map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:first-child,
+  .map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:first-child,
+  .map-artwork.marker-punjab [data-node-id='2642:2591'] > div:first-child,
+  .map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:first-child,
+  .map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:first-child,
+  .map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:last-child,
+  .map-artwork.marker-kerala [data-node-id='2642:2695'] > div:last-child
+) > div > div:nth-child(2) {
+  transform-origin: 65% 70%;
+  animation: var(--marker-left-animation) 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:is(
+  .map-artwork.marker-maharashtra [data-node-id='2642:2722'] > a,
+  .map-artwork.marker-telangana [data-node-id='2642:2513'] > div:first-child,
+  .map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:first-child,
+  .map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:first-child,
+  .map-artwork.marker-punjab [data-node-id='2642:2591'] > div:first-child,
+  .map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:first-child,
+  .map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:first-child,
+  .map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:last-child,
+  .map-artwork.marker-kerala [data-node-id='2642:2695'] > div:last-child
+) > div > div:nth-child(3) {
+  transform-origin: 35% 70%;
+  animation: var(--marker-right-animation) 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:is(
+  .map-artwork.marker-maharashtra [data-node-id='2642:2722'] > a,
+  .map-artwork.marker-telangana [data-node-id='2642:2513'] > div:first-child,
+  .map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:first-child,
+  .map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:first-child,
+  .map-artwork.marker-punjab [data-node-id='2642:2591'] > div:first-child,
+  .map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:first-child,
+  .map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:first-child,
+  .map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:last-child,
+  .map-artwork.marker-kerala [data-node-id='2642:2695'] > div:last-child
+) > div > div:nth-child(2) [class*='bg-[#ffb3d6]'] {
+  background: #5e2033 !important;
+}
+
+:is(
+  .map-artwork.marker-maharashtra [data-node-id='2642:2722'] > a,
+  .map-artwork.marker-telangana [data-node-id='2642:2513'] > div:first-child,
+  .map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:first-child,
+  .map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:first-child,
+  .map-artwork.marker-punjab [data-node-id='2642:2591'] > div:first-child,
+  .map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:first-child,
+  .map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:first-child,
+  .map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:last-child,
+  .map-artwork.marker-kerala [data-node-id='2642:2695'] > div:last-child
+) > div > div:nth-child(3) [class*='bg-[#ffb3d6]'] {
+  background: #3e1221 !important;
+}
+
+:is(
+  .map-artwork.marker-maharashtra [data-node-id='2642:2722'] > div:first-child,
+  .map-artwork.marker-telangana [data-node-id='2642:2513'] > div:last-child,
+  .map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:last-child,
+  .map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:last-child,
+  .map-artwork.marker-punjab [data-node-id='2642:2591'] > div:last-child,
+  .map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:last-child,
+  .map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:last-child,
+  .map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:first-child,
+  .map-artwork.marker-kerala [data-node-id='2642:2695'] > div:first-child
+) {
+  background: #e10c60 !important;
+}
+
+:is(
+  .map-artwork.marker-maharashtra [data-node-id='2642:2722'] > div:first-child,
+  .map-artwork.marker-telangana [data-node-id='2642:2513'] > div:last-child,
+  .map-artwork.marker-west-bengal [data-node-id='2642:2539'] > div:last-child,
+  .map-artwork.marker-uttar-pradesh [data-node-id='2642:2565'] > div:last-child,
+  .map-artwork.marker-punjab [data-node-id='2642:2591'] > div:last-child,
+  .map-artwork.marker-andhra-pradesh [data-node-id='2642:2617'] > div:last-child,
+  .map-artwork.marker-tamil-nadu [data-node-id='2642:2643'] > div:last-child,
+  .map-artwork.marker-karnataka [data-node-id='2642:2669'] > div:first-child,
+  .map-artwork.marker-kerala [data-node-id='2642:2695'] > div:first-child
+) p {
+  color: #fff !important;
+}
+
+.back-action {
+  position: absolute;
+  z-index: 20;
+  top: 36px;
+  left: 20px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.4);
+}
+
+.back-action img {
+  width: 24px;
+  height: 24px;
+}
+
+.map-artwork [data-node-id='2693:293'] {
+  display: none;
+}
+
+.discovery-tip,
+.bottom-sheet {
+  position: absolute;
+  z-index: 10;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: 1px solid #e8e8e8;
+  border-radius: 20px 20px 0 0;
+  background: #fff;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.14), 0 8px 24px rgb(0 0 0 / 0.1);
+}
+
+.discovery-tip {
+  min-height: 78px;
+  padding: 6px 12px max(14px, env(safe-area-inset-bottom));
+  animation: sheet-in 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tip-handle,
+.sheet-handle {
+  display: block;
+  width: 36px;
+  height: 5px;
+  margin: 0 auto;
+  border: 0;
+  border-radius: 999px;
+  background: #f3f3f3;
+}
+
+.discovery-tip > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.discovery-tip img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  opacity: 0.9;
+}
+
+.discovery-tip p {
+  width: min(278px, calc(100vw - 84px));
+  color: #5d5d5d;
+  font-family: 'Figtree', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.bottom-sheet {
+  --sheet-gutter: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  max-height: 50dvh;
+  padding: 6px var(--sheet-gutter) max(36px, env(safe-area-inset-bottom));
+  overflow: hidden;
+  animation: sheet-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sheet-handle {
+  padding: 0;
+}
+
+.sheet-body {
+  width: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.sheet-body::-webkit-scrollbar {
+  display: none;
+}
+
+.sheet-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  height: 48px;
+  padding: 0;
+}
+
+.state-illustration {
+  position: relative;
+  flex: 0 0 100px;
+  width: 100px;
+  height: 48px;
+  overflow: hidden;
+}
+
+.state-illustration img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.state-illustration .illustration-image {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.state-illustration .illustration-image.is-active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.state-illustration img.illustration-maharashtra {
+  top: -36.54%;
+  left: -3.09%;
+  width: 106.17%;
+  height: 165.38%;
+  max-width: none;
+}
+
+.state-illustration img.illustration-punjab {
+  top: -23.08%;
+  left: 0.06%;
+  width: 99.88%;
+  height: 144.23%;
+  max-width: none;
+}
+
+.state-illustration img.illustration-kerala {
+  top: -24.53%;
+  left: 5%;
+  width: 90%;
+  height: 141.51%;
+  max-width: none;
+}
+
+.sheet-header h2 {
+  color: #333;
+  font-family: 'Figtree', sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.sheet-header p {
+  margin-top: 0;
+  color: #949494;
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: -0.12px;
+}
+
+.dish-carousel {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  padding: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.dish-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.dish-card {
+  position: relative;
+  flex: 0 0 152px;
+  height: 168px;
+  overflow: hidden;
+  scroll-snap-align: start;
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  color: #fff;
+  text-align: left;
+}
+
+.dish-card > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.dish-gradient {
+  display: none;
+}
+
+.dish-copy::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0 -8px -11px;
+  background: linear-gradient(
+    to bottom,
+    rgb(14 14 14 / 0) 0%,
+    rgb(14 14 14 / 0.7) 30%,
+    rgb(14 14 14 / 1) 100%
+  );
+}
+
+.dish-copy {
+  z-index: 0;
+  position: absolute;
+  right: 8px;
+  bottom: 11px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.dish-copy strong {
+  max-width: 100%;
+  overflow: hidden;
+  font-family: 'Figtree', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.32px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dish-copy > span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #e8e8e8;
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.24px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.dish-copy small {
+  display: inline-flex;
+  margin-top: 4px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #ff297d;
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.dish-copy b {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes marker-cluster-bounce-a {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  36% {
+    transform: translateY(-8px) scale(1.08);
+  }
+  60% {
+    transform: translateY(2px) scale(0.98);
+  }
+  80% {
+    transform: translateY(-3px) scale(1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes marker-cluster-bounce-b {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  36% {
+    transform: translateY(-8px) scale(1.08);
+  }
+  60% {
+    transform: translateY(2px) scale(0.98);
+  }
+  80% {
+    transform: translateY(-3px) scale(1.03);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes marker-side-left-a {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  38% {
+    transform: translateX(-5px) rotate(-11deg);
+  }
+  68% {
+    transform: translateX(1px) rotate(3deg);
+  }
+}
+
+@keyframes marker-side-left-b {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  38% {
+    transform: translateX(-5px) rotate(-11deg);
+  }
+  68% {
+    transform: translateX(1px) rotate(3deg);
+  }
+}
+
+@keyframes marker-side-right-a {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  38% {
+    transform: translateX(5px) rotate(13deg);
+  }
+  68% {
+    transform: translateX(-1px) rotate(-3deg);
+  }
+}
+
+@keyframes marker-side-right-b {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  38% {
+    transform: translateX(5px) rotate(13deg);
+  }
+  68% {
+    transform: translateX(-1px) rotate(-3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-transform,
+  .state-hitboxes path {
+    transition: none;
+  }
+
+  .bottom-sheet,
+  .discovery-tip,
+  .map-artwork [data-node-id] {
+    animation: none;
+  }
+}
+
+.dish-detail-screen {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+}
+
+.detail-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+}
+
+.detail-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.detail-banner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 39 / 34;
+  overflow: hidden;
+  background: #f3f3f3;
+}
+
+.detail-banner img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-back {
+  position: absolute;
+  z-index: 200;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 12px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.5);
+}
+
+.detail-results {
+  display: flex;
+  min-height: 100dvh;
+  padding: 16px;
+  flex-direction: column;
+  gap: 16px;
+  background: #fff;
+}
+
+.detail-fallback-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #333;
+  text-align: center;
+}
+
+.detail-fallback-heading p {
+  color: #c00050;
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.detail-fallback-heading h1 {
+  font-family: 'Figtree', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+}
+
+.detail-fallback-heading span {
+  max-width: 356px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.restaurant-card {
+  flex: none;
+  overflow: hidden;
+  border: 1px solid #e8e8e8;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.restaurant-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+}
+
+.restaurant-header h3 {
+  margin-top: 4px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.restaurant-offer,
+.restaurant-meta,
+.other-apps {
+  color: #5d5d5d;
+  font-family: 'Figtree', sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.restaurant-offer {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.restaurant-offer span {
+  color: #ffd600;
+}
+
+.restaurant-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.restaurant-meta strong {
+  color: #008a25;
+  font-weight: 600;
+}
+
+.restaurant-meta i {
+  width: 1px;
+  height: 14px;
+  margin: 0 4px;
+  background: #d0d0d0;
+}
+
+.restaurant-arrow {
+  color: #949494;
+  font-size: 22px;
+}
+
+.restaurant-menu {
+  display: flex;
+  gap: 12px;
+  padding: 0 12px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.restaurant-menu::-webkit-scrollbar {
+  display: none;
+}
+
+.menu-item {
+  flex: 0 0 130px;
+  min-width: 0;
+}
+
+.menu-image {
+  position: relative;
+  width: 130px;
+  height: 128px;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f3f3f3;
+}
+
+.menu-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.menu-image small {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: #fff;
+  color: #5d5d5d;
+  font-size: 10px;
+}
+
+.menu-image button {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  min-width: 66px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #ff297d;
+  color: #fff;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+}
+
+.menu-name {
+  min-height: 40px;
+  margin-top: 8px;
+  color: #333;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.menu-name span {
+  color: #00a62b;
+}
+
+.menu-price {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 8px;
+  background: #008a25;
+  color: #fff;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.map-world [data-node-id='2872:4597'] {
+  display: none;
+}
+
+.heading-only {
+  z-index: 3;
+}
+
+.heading-only > div {
+  background: transparent !important;
+}
+
+.heading-only div:has(> [data-node-id='2872:4597']) > :not([data-node-id='2872:4597']) {
+  display: none;
+}
+
+.heading-glass {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 132px;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(to bottom, rgb(255 245 250 / 0.72), rgb(255 245 250 / 0.38));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.is-selected .heading-glass {
+  opacity: 1;
+}
+
+.scene-transform,
+.scene-transform * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.scene-transform img {
+  -webkit-user-drag: none;
+}
+
+.bottom-sheet {
+  touch-action: none;
+}
+
+.dish-carousel {
+  touch-action: pan-x;
+}

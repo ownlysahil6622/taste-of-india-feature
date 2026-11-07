@@ -1,0 +1,7 @@
+import { RV, RW } from '../../../../styles/constants/Constants';
+
+export const TASTE_OF_INDIA_INGRESS_HEIGHT = RW(72);
+export const TASTE_OF_INDIA_INGRESS_RADIUS = RW(16);
+export const TASTE_OF_INDIA_INGRESS_VERTICAL_GAP = RV(8);
+export const TASTE_OF_INDIA_INGRESS_ROW_HEIGHT =
+  TASTE_OF_INDIA_INGRESS_HEIGHT + TASTE_OF_INDIA_INGRESS_VERTICAL_GAP * 2;
