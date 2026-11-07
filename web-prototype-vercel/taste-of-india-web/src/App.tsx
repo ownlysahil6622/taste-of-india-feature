@@ -6,7 +6,39 @@ type Dish = {
   image: string;
   banner?: string;
   description: string;
+  /** Optional crop for the 152x168 dish card: the part of the source image (in its own pixels) to show. */
+  cardCrop?: CardCrop;
 };
+
+/**
+ * x/y/width: the source region whose width fills the card. height: how much of the source to show
+ * from y before cutting off (hides text baked into a banner); fillColor fills the card below that.
+ */
+type CardCrop = {
+  sourceWidth: number;
+  sourceHeight: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fillColor: string;
+};
+
+const DISH_CARD_WIDTH = 152;
+
+function cardCropStyle(crop: CardCrop) {
+  const scale = DISH_CARD_WIDTH / crop.width;
+  return {
+    position: "absolute" as const,
+    left: -crop.x * scale,
+    top: -crop.y * scale,
+    width: crop.sourceWidth * scale,
+    height: crop.sourceHeight * scale,
+    maxWidth: "none",
+    objectFit: "fill" as const,
+    clipPath: `inset(0 0 ${(crop.sourceHeight - crop.y - crop.height) * scale}px 0)`,
+  };
+}
 
 type StateData = {
   name: string;
@@ -19,6 +51,11 @@ type StateData = {
 
 const description = "A much-loved regional dish, layered with local spices and traditional flavours.";
 
+// Punjab banners (587x510) reused as dish cards. Every Punjab banner has the dish centred at x≈294,
+// ending by y≈352, with the banner's own text starting at y≈360: show x 143–446 from y 175 and cut
+// off at y 356, filling the rest of the card with the banner's pale pink.
+const PUNJAB_BANNER_CARD_CROP: CardCrop = { sourceWidth: 587, sourceHeight: 510, x: 143, y: 175, width: 303, height: 181, fillColor: "#ffe8f3" };
+
 const states: StateData[] = [
   {
     name: "Punjab",
@@ -27,11 +64,11 @@ const states: StateData[] = [
     target: { left: "35%", top: "30%", width: "14%", height: "3.5%" },
     marker: { x: 115, y: 266, image: "/assets/1af0b.png", count: 5 },
     dishes: [
-      { name: "Amritsari Kulche", image: "/assets/cards/punjab-amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", description },
-      { name: "Butter Chicken", image: "/assets/cards/punjab-butter-chicken.png", banner: "/assets/banners/butter-chicken.png", description },
-      { name: "Chole Bhature", image: "/assets/cards/punjab-chole-bhature.png", banner: "/assets/banners/chole-bhature.png", description },
-      { name: "Dal Makhni", image: "/assets/cards/punjab-dal-makhni.png", banner: "/assets/banners/dal-makhni.png", description },
-      { name: "Lassi", image: "/assets/cards/punjab-lassi.png", banner: "/assets/banners/lassi.png", description },
+      { name: "Amritsari Kulche", image: "/assets/banners/amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
+      { name: "Butter Chicken", image: "/assets/banners/butter-chicken.png", banner: "/assets/banners/butter-chicken.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
+      { name: "Chole Bhature", image: "/assets/banners/chole-bhature.png", banner: "/assets/banners/chole-bhature.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
+      { name: "Dal Makhni", image: "/assets/banners/dal-makhni.png", banner: "/assets/banners/dal-makhni.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
+      { name: "Lassi", image: "/assets/banners/lassi.png", banner: "/assets/banners/lassi.png", description, cardCrop: PUNJAB_BANNER_CARD_CROP },
     ],
   },
   {
@@ -364,8 +401,14 @@ function BottomSheet({
         </header>
         <div className="dish-carousel" role="list">
           {state.dishes.map((dish) => (
-            <button className="dish-card" key={dish.name} role="listitem" onClick={() => onSelectDish(dish)}>
-              <img src={dish.image} alt="" />
+            <button
+              className="dish-card"
+              key={dish.name}
+              role="listitem"
+              style={dish.cardCrop ? { background: dish.cardCrop.fillColor } : undefined}
+              onClick={() => onSelectDish(dish)}
+            >
+              <img src={dish.image} alt="" style={dish.cardCrop ? cardCropStyle(dish.cardCrop) : undefined} />
               <span className="dish-gradient" />
               <span className="dish-copy">
                 <strong>{dish.name}</strong>

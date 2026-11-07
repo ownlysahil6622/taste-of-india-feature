@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     borderColor: TASTE_OF_INDIA_COLORS.border,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    backgroundColor: TASTE_OF_INDIA_COLORS.white,
+    backgroundColor: TASTE_OF_INDIA_COLORS.sheetBackground,
     boxShadow: TASTE_OF_INDIA_SHEET_SHADOW,
   },
   handle: {

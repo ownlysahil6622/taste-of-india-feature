@@ -18,11 +18,28 @@ export type TasteOfIndiaMapLayer =
   | { kind: 'image'; assetKey: string }
   | { kind: 'state'; state: string; dormantAssetKey: string };
 
+/**
+ * Part of the source image (in its own pixels) to show in the 152x168 dish
+ * card. x/y/width: the region whose width fills the card. height: how much of
+ * the source to show from y before cutting off (hides text baked into a
+ * banner); fillColor fills the card below that.
+ */
+export type TasteOfIndiaCardImageCrop = {
+  sourceWidth: number;
+  sourceHeight: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fillColor: string;
+};
+
 export type TasteOfIndiaDish = {
   name: string;
   imageKey: string;
   bannerKey?: string;
   description: string;
+  cardImageCrop?: TasteOfIndiaCardImageCrop;
 };
 
 export type TasteOfIndiaIllustrationCrop = {

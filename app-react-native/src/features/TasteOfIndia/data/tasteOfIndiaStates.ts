@@ -1,7 +1,24 @@
-import type { TasteOfIndiaState } from '../types';
+import type {
+  TasteOfIndiaCardImageCrop,
+  TasteOfIndiaState,
+} from '../types';
 
 const DEFAULT_DISH_DESCRIPTION =
   'A much-loved regional dish, layered with local spices and traditional flavours.';
+
+// Punjab banners (587x510) reused as dish cards. Every Punjab banner has the
+// dish centred at x≈294, ending by y≈352, with the banner's own text starting
+// at y≈360: show x 143–446 from y 175 and cut off at y 356, filling the rest of
+// the card with the banner's pale pink.
+const PUNJAB_BANNER_CARD_CROP: TasteOfIndiaCardImageCrop = {
+  sourceWidth: 587,
+  sourceHeight: 510,
+  x: 143,
+  y: 175,
+  width: 303,
+  height: 181,
+  fillColor: '#FFE8F3',
+};
 
 export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
   {
@@ -20,33 +37,38 @@ export const tasteOfIndiaStates: readonly TasteOfIndiaState[] = [
     dishes: [
       {
         name: 'Amritsari Kulche',
-        imageKey: 'cards/punjab-amritsari-kulche.png',
+        imageKey: 'banners/amritsari-kulche.png',
         bannerKey: 'banners/amritsari-kulche.png',
         description: DEFAULT_DISH_DESCRIPTION,
+        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Butter Chicken',
-        imageKey: 'cards/punjab-butter-chicken.png',
+        imageKey: 'banners/butter-chicken.png',
         bannerKey: 'banners/butter-chicken.png',
         description: DEFAULT_DISH_DESCRIPTION,
+        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Chole Bhature',
-        imageKey: 'cards/punjab-chole-bhature.png',
+        imageKey: 'banners/chole-bhature.png',
         bannerKey: 'banners/chole-bhature.png',
         description: DEFAULT_DISH_DESCRIPTION,
+        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Dal Makhni',
-        imageKey: 'cards/punjab-dal-makhni.png',
+        imageKey: 'banners/dal-makhni.png',
         bannerKey: 'banners/dal-makhni.png',
         description: DEFAULT_DISH_DESCRIPTION,
+        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
       {
         name: 'Lassi',
-        imageKey: 'cards/punjab-lassi.png',
+        imageKey: 'banners/lassi.png',
         bannerKey: 'banners/lassi.png',
         description: DEFAULT_DISH_DESCRIPTION,
+        cardImageCrop: PUNJAB_BANNER_CARD_CROP,
       },
     ],
   },

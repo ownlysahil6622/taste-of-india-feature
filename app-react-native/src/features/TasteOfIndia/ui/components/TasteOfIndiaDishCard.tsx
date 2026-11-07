@@ -8,7 +8,10 @@ import {
   TASTE_OF_INDIA_DISH_OVERLAY_LOCATIONS,
   TASTE_OF_INDIA_FONTS,
 } from '../../constants';
-import type { TasteOfIndiaDish } from '../../types';
+import type {
+  TasteOfIndiaCardImageCrop,
+  TasteOfIndiaDish,
+} from '../../types';
 import { TasteOfIndiaImage } from './TasteOfIndiaImage';
 import { TasteOfIndiaText } from './TasteOfIndiaText';
 
@@ -20,22 +23,59 @@ type TasteOfIndiaDishCardProps = {
   onPress: (dish: TasteOfIndiaDish) => void;
 };
 
+const cardCropLayout = (crop: TasteOfIndiaCardImageCrop) => {
+  const scale = TASTE_OF_INDIA_DISH_CARD_WIDTH / crop.width;
+  return {
+    // Clips the image just above any text baked into the source.
+    clip: {
+      position: 'absolute' as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      height: crop.height * scale,
+      overflow: 'hidden' as const,
+    },
+    image: {
+      position: 'absolute' as const,
+      left: -crop.x * scale,
+      top: -crop.y * scale,
+      width: crop.sourceWidth * scale,
+      height: crop.sourceHeight * scale,
+    },
+  };
+};
+
 export const TasteOfIndiaDishCard = memo(function TasteOfIndiaDishCard({
   dish,
   onPress,
 }: TasteOfIndiaDishCardProps) {
   return (
     <Pressable
-      style={styles.card}
+      style={[
+        styles.card,
+        dish.cardImageCrop
+          ? { backgroundColor: dish.cardImageCrop.fillColor }
+          : null,
+      ]}
       onPress={() => onPress(dish)}
       accessibilityRole="button"
       accessibilityLabel={dish.name}
     >
-      <TasteOfIndiaImage
-        assetKey={dish.imageKey}
-        resizeMode="cover"
-        style={StyleSheet.absoluteFill}
-      />
+      {dish.cardImageCrop ? (
+        <View style={cardCropLayout(dish.cardImageCrop).clip}>
+          <TasteOfIndiaImage
+            assetKey={dish.imageKey}
+            resizeMode="stretch"
+            style={cardCropLayout(dish.cardImageCrop).image}
+          />
+        </View>
+      ) : (
+        <TasteOfIndiaImage
+          assetKey={dish.imageKey}
+          resizeMode="cover"
+          style={StyleSheet.absoluteFill}
+        />
+      )}
       <View style={styles.copy}>
         <LinearGradient
           pointerEvents="none"

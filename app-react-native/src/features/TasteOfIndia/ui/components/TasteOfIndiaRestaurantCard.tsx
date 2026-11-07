@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     height: 128,
     overflow: 'hidden',
     borderRadius: 16,
-    backgroundColor: TASTE_OF_INDIA_COLORS.handle,
+    backgroundColor: TASTE_OF_INDIA_COLORS.imagePlaceholder,
   },
   menuBadge: {
     position: 'absolute',
