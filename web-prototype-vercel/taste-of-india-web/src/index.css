@@ -574,7 +574,7 @@
   animation-delay: calc(140ms + var(--card-order, 0) * 60ms);
 }
 
-/* One card design for every dish: light grey tile, dish image on top, dark text below. */
+/* One card design for every dish: #F3F3F3 image panel on top, white text area below, thin border. */
 .dish-card {
   position: relative;
   display: block;
@@ -583,9 +583,9 @@
   padding: 0;
   overflow: hidden;
   isolation: isolate;
-  border: 0;
+  border: 1px solid #ededed;
   border-radius: 10px;
-  background: #f3f3f3;
+  background: #fff;
   color: #1a1a1a;
   text-align: left;
   -webkit-tap-highlight-color: transparent;
@@ -596,8 +596,20 @@
   transform: scale(0.97);
 }
 
+/* Image panel: 150x78 inside the 1px border (CARD_MEDIA in App.tsx). */
+.dish-media {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 78px;
+  overflow: hidden;
+  border-radius: 9px 9px 0 0;
+  background: #f3f3f3;
+}
+
 /* Position and size come from getCardImage() in App.tsx. */
-.dish-card > img {
+.dish-media > img {
   position: absolute;
   display: block;
   max-width: none;
@@ -666,7 +678,7 @@
 }
 
 @media (hover: hover) {
-  .dish-card:hover > img {
+  .dish-card:hover .dish-media > img {
     transform: scale(1.05);
   }
 
@@ -1086,7 +1098,7 @@
 
   .pin:active .pin-body,
   .dish-card:active,
-  .dish-card:hover > img,
+  .dish-card:hover .dish-media > img,
   .dish-card:active .dish-copy b,
   .dish-card:hover .dish-copy b {
     transform: none;

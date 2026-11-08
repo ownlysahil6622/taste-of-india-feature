@@ -23,25 +23,28 @@ type Dish = {
 
 const DISH_CARD_WIDTH = 152;
 const DISH_CARD_GAP = 8;
-// Point in the card the photo zooms around on hover: roughly the centre of the plate.
-const CARD_FOCUS = { x: 76, y: 48 };
+// The #F3F3F3 image panel at the top of each card, inside the card's 1px border (see .dish-media).
+const CARD_MEDIA = { width: 150, height: 78 };
+// Point in the image panel the photo zooms around on hover: its centre.
+const CARD_FOCUS = { x: CARD_MEDIA.width / 2, y: CARD_MEDIA.height / 2 };
 
 type Size = { width: number; height: number };
 type CardImage = { src: string; style: CSSProperties };
 
-// Cut-outs share one 450x500 frame with the dish between x 30–417 and y 41–278. A 539px-wide window
-// centred on x 225, from y 23.6 (scale ≈0.282), puts the dish at card y ≈5–72, above the text.
+// Cut-outs share one 450x500 frame (or the same 9:10 frame at a smaller size, e.g. 333x370; it is
+// scaled to fit) with the dish between x 30–417 and y 41–278. A 539px-wide window
+// centred on x 225, from y 23.6, shown 152px wide (scale ≈0.282), puts the dish at panel y ≈3–70.
 const CUTOUT_SIZE: Size = { width: 450, height: 500 };
 const CUTOUT_WINDOW = { x: -44.5, y: 23.6, width: 539 };
 
-// Fallback until a cut-out exists: the dish from the banner as a rounded photo in the top of the
-// card. Banners are 510px tall with the dish centred and ending by y≈357 (their own text starts at
-// y≈360), so a 363x192 window from y 165 fills the 136x72 box.
+// Fallback until a cut-out exists: the dish from the banner as a rounded photo centred in the image
+// panel. Banners are 510px tall with the dish centred and ending by y≈357 (their own text starts at
+// y≈360), so a 390x192 window from y 165 fills the 134x66 box.
 const BANNER_HEIGHT = 510;
-const FALLBACK_BOX = { left: 8, top: 8, width: 136, height: 72, radius: 8 };
+const FALLBACK_BOX = { left: 8, top: 6, width: 134, height: 66, radius: 8 };
 
 /**
- * Scales an image so its `window` (source px) lands at the card position box.left/top, box.width
+ * Scales an image so its `window` (source px) lands at the image-panel position box.left/top, box.width
  * wide. With a box height the image is also clipped to that box with rounded corners.
  */
 function placeCardImage(
@@ -64,10 +67,11 @@ function placeCardImage(
 /** The image shown on a dish card: its cut-out if there is one, otherwise a crop of its banner. */
 function getCardImage(dish: Dish, state: StateData): CardImage {
   if (dish.cardImage) {
-    return { src: dish.cardImage, style: placeCardImage(CUTOUT_SIZE, CUTOUT_WINDOW, { left: 0, top: 0, width: DISH_CARD_WIDTH }) };
+    const box = { left: (CARD_MEDIA.width - DISH_CARD_WIDTH) / 2, top: -2, width: DISH_CARD_WIDTH };
+    return { src: dish.cardImage, style: placeCardImage(CUTOUT_SIZE, CUTOUT_WINDOW, box) };
   }
   if (dish.banner) {
-    const window = { x: state.bannerWidth / 2 - 181.5, y: 165, width: 363 };
+    const window = { x: state.bannerWidth / 2 - 195, y: 165, width: 390 };
     return { src: dish.banner, style: placeCardImage({ width: state.bannerWidth, height: BANNER_HEIGHT }, window, FALLBACK_BOX) };
   }
   const { radius, ...box } = FALLBACK_BOX;
@@ -465,7 +469,9 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
           return (
             <div className="dish-slot" role="listitem" key={dish.name} style={{ "--card-order": index } as CSSProperties}>
               <button type="button" className="dish-card" onClick={() => onSelectDish(dish)}>
-                <img src={image.src} alt="" style={image.style} />
+                <span className="dish-media">
+                  <img src={image.src} alt="" style={image.style} />
+                </span>
                 <span className="dish-copy">
                   <strong>{dish.name}</strong>
                   <span>{dish.description}</span>
