@@ -77,8 +77,8 @@ function bannerCardCrop(bannerWidth: number): CardCrop {
 
 // Cut-out card images share one 450x500 frame with the dish between x 30–417 and y 41–278, so one
 // crop fits them all. A 620px-wide window from y 21 (scale ≈0.245) puts the dish at card y ≈5–63,
-// above the text block, on a #FFF0F7 card.
-const CUTOUT_CARD_CROP: CardCrop = { sourceWidth: 450, sourceHeight: 500, x: -85, y: 21, width: 620, height: 479, fillColor: "#FFF0F7" };
+// above the text block, on a #F3F3F3 card.
+const CUTOUT_CARD_CROP: CardCrop = { sourceWidth: 450, sourceHeight: 500, x: -85, y: 21, width: 620, height: 479, fillColor: "#F3F3F3" };
 
 const states: StateData[] = [
   {
