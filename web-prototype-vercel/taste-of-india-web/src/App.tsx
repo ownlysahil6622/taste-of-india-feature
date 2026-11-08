@@ -76,8 +76,9 @@ function bannerCardCrop(bannerWidth: number): CardCrop {
 }
 
 // Cut-out card images share one 450x500 frame with the dish between x 30–417 and y 41–278, so one
-// crop fits them all: a 400px-wide window from y 30, on a #F3F3F3 card.
-const CUTOUT_CARD_CROP: CardCrop = { sourceWidth: 450, sourceHeight: 500, x: 25, y: 30, width: 400, height: 470, fillColor: "#F3F3F3" };
+// crop fits them all. A 620px-wide window from y 21 (scale ≈0.245) puts the dish at card y ≈5–63,
+// above the text block, on a #FFF0F7 card.
+const CUTOUT_CARD_CROP: CardCrop = { sourceWidth: 450, sourceHeight: 500, x: -85, y: 21, width: 620, height: 479, fillColor: "#FFF0F7" };
 
 const states: StateData[] = [
   {
@@ -444,7 +445,7 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
           <div className="dish-slot" role="listitem" key={dish.name} style={{ "--card-order": index } as CSSProperties}>
             <button
               type="button"
-              className="dish-card"
+              className={`dish-card ${dish.cardImage ? "is-cutout" : ""}`}
               style={dish.cardImage ? { background: CUTOUT_CARD_CROP.fillColor } : dish.banner ? { background: crop.fillColor } : undefined}
               onClick={() => onSelectDish(dish)}
             >
@@ -452,7 +453,7 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
               <img
                 src={dish.cardImage ?? dish.banner ?? dish.image}
                 alt=""
-                style={dish.cardImage ? cardCropStyle(CUTOUT_CARD_CROP) : dish.banner ? cardCropStyle(crop) : undefined}
+                style={dish.cardImage ? { ...cardCropStyle(CUTOUT_CARD_CROP), clipPath: "none" } : dish.banner ? cardCropStyle(crop) : undefined}
               />
               <span className="dish-copy">
                 {/* Names over 14 characters drop to 15px and may wrap to 2 lines instead of being cut off. */}

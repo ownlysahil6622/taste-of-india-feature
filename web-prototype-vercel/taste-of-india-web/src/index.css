@@ -709,6 +709,40 @@
   }
 }
 
+/* Cut-out cards (Punjab): light pink tile, dish on top with a soft shadow, dark text below, no overlay. */
+.dish-card.is-cutout {
+  color: #1a1a1a;
+}
+
+.dish-card.is-cutout > img {
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.15));
+}
+
+.dish-card.is-cutout .dish-copy::before {
+  content: none;
+}
+
+.dish-card.is-cutout .dish-copy strong,
+.dish-card.is-cutout .dish-copy strong.is-long {
+  display: block;
+  font-size: 16px;
+  color: #1a1a1a;
+  white-space: nowrap;
+  text-shadow: none;
+}
+
+.dish-card.is-cutout .dish-copy > span {
+  color: #5d5d5d;
+  text-shadow: none;
+}
+
+.dish-card.is-cutout .dish-copy small {
+  margin-top: 4px;
+  background: #ff297d;
+  box-shadow: none;
+  color: #fff;
+}
+
 .carousel-dots {
   display: flex;
   justify-content: center;
