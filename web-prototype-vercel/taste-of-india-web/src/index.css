@@ -24,6 +24,13 @@
 }
 
 .app-shell {
+  /* Map header geometry, shared with the dish detail back button so both back buttons line up. */
+  --header-height: 108px; /* HEADER_HEIGHT in App.tsx */
+  --header-pad-top: 40px;
+  --header-pad-bottom: 12px;
+  --header-pad-x: 20px;
+  --header-border: 1px;
+  --back-size: 44px;
   position: relative;
   width: min(100%, 430px);
   margin: 0 auto;
@@ -293,9 +300,7 @@
 
 .pin.is-selected .pin-label {
   background: #ff297d;
-  box-shadow:
-    0 0 0 3px rgb(255 41 125 / 0.18),
-    0 4px 12px rgb(255 41 125 / 0.4);
+  box-shadow: 0 4px 10px rgb(0 0 0 / 0.18), 0 1px 3px rgb(0 0 0 / 0.12);
   color: #fff;
 }
 
@@ -307,19 +312,20 @@
   left: 0;
   box-sizing: border-box;
   display: flex;
-  height: 108px; /* HEADER_HEIGHT in App.tsx */
+  height: var(--header-height);
   align-items: center;
   gap: 16px;
-  padding: 40px 20px 12px;
-  border-bottom: 1px solid #efefef;
+  padding: var(--header-pad-top) var(--header-pad-x) var(--header-pad-bottom);
+  border-bottom: var(--header-border) solid #efefef;
   background: #fff;
 }
 
-.back-action {
+/* Shared look of both back buttons (map header and dish detail). */
+.back-button {
   display: grid;
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: var(--back-size);
+  height: var(--back-size);
   padding: 0;
   place-items: center;
   border: 1px solid #e8e8e8;
@@ -867,18 +873,17 @@
   object-fit: cover;
 }
 
+/* Same spot as the map header's back button: left padding, and vertically centred in the header's
+   content box (the header has no safe-area inset, so neither does this). */
 .detail-back {
   position: absolute;
   z-index: 200;
-  top: calc(env(safe-area-inset-top, 0px) + 10px);
-  left: 12px;
-  display: grid;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: rgb(255 255 255 / 0.5);
+  top: calc(
+    var(--header-pad-top) +
+      (var(--header-height) - var(--header-pad-top) - var(--header-pad-bottom) - var(--header-border) - var(--back-size)) / 2
+  );
+  left: var(--header-pad-x);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
 }
 
 .detail-results {

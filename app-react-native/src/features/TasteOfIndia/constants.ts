@@ -87,6 +87,7 @@ export const TASTE_OF_INDIA_HEADER_PADDING_BOTTOM = 12;
 export const TASTE_OF_INDIA_HEADER_PADDING_X = 20;
 export const TASTE_OF_INDIA_HEADER_GAP = 16;
 export const TASTE_OF_INDIA_HEADER_BACK_SIZE = 44;
+export const TASTE_OF_INDIA_HEADER_BORDER_WIDTH = 1;
 export const TASTE_OF_INDIA_SCENE_DURATION_MS = 520;
 export const TASTE_OF_INDIA_DISCOVERY_TIP_DURATION_MS = 420;
 export const TASTE_OF_INDIA_BOTTOM_SHEET_DURATION_MS = 520;
@@ -104,11 +105,10 @@ export const TASTE_OF_INDIA_MARKER_SHADOW_GRADIENT =
 export const TASTE_OF_INDIA_DISH_SHADOW_GRADIENT =
   'radial-gradient(ellipse closest-side, rgba(28, 0, 11, 0.38) 0%, rgba(28, 0, 11, 0.22) 55%, rgba(28, 0, 11, 0) 100%)';
 
-export const TASTE_OF_INDIA_COLLECTION_BACK_TOP_GAP = 10;
-export const TASTE_OF_INDIA_COLLECTION_BACK_LEFT = 12;
 export const TASTE_OF_INDIA_BANNER_ASPECT_RATIO = 39 / 34;
 export const TASTE_OF_INDIA_BANNER_PLACEHOLDER_COLOR = '#F3F3F3';
-export const TASTE_OF_INDIA_BACK_ICON_COLOR = '#111111';
+// Keeps the dish detail back button visible on top of the banner image.
+export const TASTE_OF_INDIA_BACK_BUTTON_SHADOW = '0px 2px 8px rgba(0, 0, 0, 0.12)';
 
 export const TASTE_OF_INDIA_SHEET_MAX_HEIGHT_RATIO = 0.5;
 

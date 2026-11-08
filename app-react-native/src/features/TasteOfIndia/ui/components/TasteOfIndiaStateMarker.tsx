@@ -357,7 +357,18 @@ const styles = StyleSheet.create({
     backgroundColor: TASTE_OF_INDIA_COLORS.white,
     boxShadow: TASTE_OF_INDIA_SHEET_SHADOW,
   },
-  labelSelected: { backgroundColor: TASTE_OF_INDIA_COLORS.markerSelected },
+  // Selected: soft neutral drop shadow only. The base boxShadow is cleared so the two don't stack,
+  // and overflow is visible because iOS clips shadows on views with overflow: 'hidden'.
+  labelSelected: {
+    overflow: 'visible',
+    backgroundColor: TASTE_OF_INDIA_COLORS.markerSelected,
+    boxShadow: [],
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
   labelText: {
     fontFamily: TASTE_OF_INDIA_FONTS.medium,
     fontSize: 10,

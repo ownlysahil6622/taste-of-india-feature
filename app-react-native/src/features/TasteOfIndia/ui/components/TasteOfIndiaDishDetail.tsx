@@ -1,10 +1,3 @@
-import { ResponsiveIconSizes } from '@assets/icons';
-import Icon from '@components/global/Icon';
-import {
-  CATEGORY_HEADER_BACK_SCRIM,
-  CATEGORY_HEADER_BACK_SIZE,
-} from '@features/nova/components/CategoryHeader';
-import { NovaPressable } from '@features/nova/components/common/NovaPressable';
 import React, { memo } from 'react';
 import {
   ScrollView,
@@ -14,15 +7,15 @@ import {
 } from 'react-native';
 
 import {
-  TASTE_OF_INDIA_BACK_ICON_COLOR,
+  TASTE_OF_INDIA_BACK_BUTTON_SHADOW,
   TASTE_OF_INDIA_BANNER_ASPECT_RATIO,
   TASTE_OF_INDIA_BANNER_PLACEHOLDER_COLOR,
-  TASTE_OF_INDIA_COLLECTION_BACK_LEFT,
   TASTE_OF_INDIA_COLORS,
   TASTE_OF_INDIA_FONTS,
 } from '../../constants';
-import { useTasteOfIndiaCollectionBackTop } from '../../hooks';
+import { useTasteOfIndiaBackButtonPosition } from '../../hooks';
 import type { TasteOfIndiaDish, TasteOfIndiaState } from '../../types';
+import { TasteOfIndiaBackButton } from './TasteOfIndiaBackButton';
 import { TasteOfIndiaImage } from './TasteOfIndiaImage';
 import { TasteOfIndiaRestaurantCard } from './TasteOfIndiaRestaurantCard';
 import { TasteOfIndiaText } from './TasteOfIndiaText';
@@ -47,7 +40,7 @@ export const TasteOfIndiaDishDetail = memo(function TasteOfIndiaDishDetail({
   onBack,
 }: TasteOfIndiaDishDetailProps) {
   const { height } = useWindowDimensions();
-  const backTop = useTasteOfIndiaCollectionBackTop();
+  const backPosition = useTasteOfIndiaBackButtonPosition();
 
   return (
     <View style={styles.root} accessibilityLabel={`${dish.name} collection`}>
@@ -77,19 +70,11 @@ export const TasteOfIndiaDishDetail = memo(function TasteOfIndiaDishDetail({
           <TasteOfIndiaRestaurantCard />
         </View>
       </ScrollView>
-      <NovaPressable
+      <TasteOfIndiaBackButton
         onPress={onBack}
-        style={[styles.back, { top: backTop }]}
-        accessibilityRole="button"
         accessibilityLabel="Back to state dishes"
-      >
-        <Icon
-          iconFamily="svg"
-          name="arrow_back"
-          size={ResponsiveIconSizes.md}
-          color={TASTE_OF_INDIA_BACK_ICON_COLOR}
-        />
-      </NovaPressable>
+        style={[styles.back, backPosition]}
+      />
     </View>
   );
 });
@@ -106,16 +91,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: TASTE_OF_INDIA_BANNER_PLACEHOLDER_COLOR,
   },
+  // Look and size come from TasteOfIndiaBackButton; position from useTasteOfIndiaBackButtonPosition.
   back: {
     position: 'absolute',
-    left: TASTE_OF_INDIA_COLLECTION_BACK_LEFT,
     zIndex: 200,
-    width: CATEGORY_HEADER_BACK_SIZE,
-    height: CATEGORY_HEADER_BACK_SIZE,
-    borderRadius: CATEGORY_HEADER_BACK_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: CATEGORY_HEADER_BACK_SCRIM,
+    boxShadow: TASTE_OF_INDIA_BACK_BUTTON_SHADOW,
   },
   results: {
     padding: 16,

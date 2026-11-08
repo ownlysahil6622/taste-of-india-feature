@@ -630,6 +630,16 @@ function RestaurantCard() {
   );
 }
 
+/** Arrow used by both back buttons (map header and dish detail). */
+function BackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 12H5" />
+      <path d="M12 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
 function DishDetail({
   dish,
   state,
@@ -665,11 +675,8 @@ function DishDetail({
           <RestaurantCard />
         </div>
       </div>
-      <button className="detail-back" onClick={onBack} aria-label="Back to state dishes">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
+      <button className="back-button detail-back" onClick={onBack} aria-label="Back to state dishes">
+        <BackIcon />
       </button>
     </section>
   );
@@ -861,14 +868,11 @@ export default function App() {
 
       <header className="map-header">
         <button
-          className="back-action"
+          className="back-button"
           onClick={() => selected && setSelected(null)}
           aria-label={selected ? "Close state details" : "Go back"}
         >
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M19 12H5" />
-            <path d="M12 19l-7-7 7-7" />
-          </svg>
+          <BackIcon />
         </button>
         <div className="map-header-text">
           <h1>Taste of India</h1>
