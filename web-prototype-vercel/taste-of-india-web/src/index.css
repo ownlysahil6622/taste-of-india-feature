@@ -543,7 +543,7 @@
 .sheet-header h2 {
   color: #333;
   font-family: 'Figtree', sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   line-height: normal;
 }
@@ -725,22 +725,32 @@
 .dish-card.is-cutout .dish-copy strong,
 .dish-card.is-cutout .dish-copy strong.is-long {
   display: block;
-  font-size: 16px;
+  font-size: 14px;
+  font-weight: 700;
   color: #1a1a1a;
   white-space: nowrap;
   text-shadow: none;
 }
 
 .dish-card.is-cutout .dish-copy > span {
+  font-size: 12px;
+  font-weight: 500;
   color: #5d5d5d;
   text-shadow: none;
 }
 
+/* Plain pink text button: no pill, just "Explore →". */
 .dish-card.is-cutout .dish-copy small {
+  height: auto;
   margin-top: 4px;
-  background: #ff297d;
+  padding: 0;
+  border-radius: 0;
+  background: none;
   box-shadow: none;
-  color: #fff;
+  color: #ff297d;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .carousel-dots {
