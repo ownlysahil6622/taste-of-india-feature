@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   },
   copy: { flex: 1 },
   title: {
-    fontFamily: Fonts.FrauncesSemiBold,
+    fontFamily: Fonts.FigtreeSemiBold,
     fontSize: 20,
     color: '#9A0040',
   },

@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     backgroundColor: TASTE_OF_INDIA_COLORS.separator,
   },
-  arrow: { fontSize: 22, color: TASTE_OF_INDIA_COLORS.textMuted },
+  arrow: { fontFamily: TASTE_OF_INDIA_FONTS.regular, fontSize: 22, color: TASTE_OF_INDIA_COLORS.textMuted },
   menu: { gap: 12, paddingHorizontal: 12, paddingBottom: 14 },
   menuItem: { width: 130 },
   menuImage: {
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: TASTE_OF_INDIA_COLORS.textPrimary,
   },
-  menuVeg: { color: TASTE_OF_INDIA_COLORS.successVeg },
+  menuVeg: { fontFamily: TASTE_OF_INDIA_FONTS.semiBold, color: TASTE_OF_INDIA_COLORS.successVeg },
   price: {
     alignSelf: 'flex-start',
     paddingVertical: 1,

@@ -15,7 +15,7 @@
     overflow: hidden;
     background: #f1eef0;
     color: #333;
-    font-family: 'Figtree', sans-serif;
+    font-family: 'Figtree', sans-serif; /* the only font; everything inherits it */
   }
 
   button {
@@ -237,7 +237,6 @@
     0 0 0 1.5px #fff,
     0 2px 4px rgb(225 12 96 / 0.35);
   color: #fff;
-  font-family: 'Figtree', sans-serif;
   font-size: 10px;
   font-weight: 700;
   line-height: 17px;
@@ -285,7 +284,6 @@
   background: rgb(255 255 255 / 0.85);
   box-shadow: 0 1px 3px rgb(94 32 51 / 0.12);
   color: #3d3d3d;
-  font-family: 'Figtree', sans-serif;
   font-size: 12px;
   font-weight: 500;
   line-height: 1;
@@ -337,7 +335,6 @@
 .map-header-text h1 {
   margin: 0;
   color: #1a1a1a;
-  font-family: 'Figtree', sans-serif;
   font-size: 16px;
   font-weight: 700;
   line-height: 22px;
@@ -346,7 +343,6 @@
 .map-header-text p {
   margin: 2px 0 0;
   color: #6b6b6b;
-  font-family: 'Figtree', sans-serif;
   font-size: 14px;
   font-weight: 500;
   line-height: 18px;
@@ -423,7 +419,6 @@
   margin: 0;
   overflow: hidden;
   color: #333;
-  font-family: 'Figtree', sans-serif;
   font-size: 15px;
   font-weight: 500;
   line-height: 20px;
@@ -542,7 +537,6 @@
 
 .sheet-header h2 {
   color: #333;
-  font-family: 'Figtree', sans-serif;
   font-size: 20px;
   font-weight: 600;
   line-height: normal;
@@ -551,7 +545,6 @@
 .sheet-header p {
   margin-top: 0;
   color: #949494;
-  font-family: 'Figtree', sans-serif;
   font-size: 12px;
   font-weight: 500;
   line-height: normal;
@@ -581,6 +574,7 @@
   animation-delay: calc(140ms + var(--card-order, 0) * 60ms);
 }
 
+/* One card design for every dish: light grey tile, dish image on top, dark text below. */
 .dish-card {
   position: relative;
   display: block;
@@ -591,8 +585,8 @@
   isolation: isolate;
   border: 0;
   border-radius: 10px;
-  background: #fff;
-  color: #fff;
+  background: #f3f3f3;
+  color: #1a1a1a;
   text-align: left;
   -webkit-tap-highlight-color: transparent;
   transition: transform 160ms cubic-bezier(0.2, 0, 0, 1);
@@ -602,27 +596,14 @@
   transform: scale(0.97);
 }
 
+/* Position and size come from getCardImage() in App.tsx. */
 .dish-card > img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 420ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-/* Dark only behind the text block (title + 2-line description + button), with a short fade above it. */
-.dish-copy::before {
-  content: '';
   position: absolute;
-  z-index: -1;
-  inset: -18px -10px -10px;
-  background: linear-gradient(
-    to bottom,
-    rgb(14 14 14 / 0) 0%,
-    rgb(14 14 14 / 0.62) 24%,
-    rgb(14 14 14 / 0.86) 48%,
-    rgb(14 14 14 / 0.96) 100%
-  );
+  display: block;
+  max-width: none;
+  object-fit: fill;
+  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.15));
+  transition: transform 420ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .dish-copy {
@@ -638,55 +619,40 @@
 }
 
 .dish-copy strong {
+  display: block;
   max-width: 100%;
   overflow: hidden;
-  font-family: 'Figtree', sans-serif;
-  font-size: 17px;
+  color: #1a1a1a;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.34px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
-}
-
-.dish-copy strong.is-long {
-  display: -webkit-box;
-  font-size: 15px;
-  white-space: normal;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
 
 .dish-copy > span {
   display: -webkit-box;
   overflow: hidden;
-  color: rgb(255 255 255 / 0.8);
-  font-family: 'Figtree', sans-serif;
-  font-size: 13px;
+  color: #5d5d5d;
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.2px;
-  text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 
-/* Compact, light Explore pill. */
+/* Plain pink text button: "Explore →". */
 .dish-copy small {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 28px;
-  margin-top: 6px;
-  padding: 0 11px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.16);
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.35);
-  font-family: 'Figtree', sans-serif;
+  margin-top: 4px;
+  color: #ff297d;
   font-size: 12px;
   font-weight: 600;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .dish-copy b {
@@ -707,50 +673,6 @@
   .dish-card:hover .dish-copy b {
     transform: translateX(3px);
   }
-}
-
-/* Cut-out cards (Punjab): light grey tile, dish on top with a soft shadow, dark text below, no overlay. */
-.dish-card.is-cutout {
-  color: #1a1a1a;
-}
-
-.dish-card.is-cutout > img {
-  filter: drop-shadow(0 6px 10px rgb(0 0 0 / 0.15));
-}
-
-.dish-card.is-cutout .dish-copy::before {
-  content: none;
-}
-
-.dish-card.is-cutout .dish-copy strong,
-.dish-card.is-cutout .dish-copy strong.is-long {
-  display: block;
-  font-size: 14px;
-  font-weight: 700;
-  color: #1a1a1a;
-  white-space: nowrap;
-  text-shadow: none;
-}
-
-.dish-card.is-cutout .dish-copy > span {
-  font-size: 12px;
-  font-weight: 500;
-  color: #5d5d5d;
-  text-shadow: none;
-}
-
-/* Plain pink text button: no pill, just "Explore →". */
-.dish-card.is-cutout .dish-copy small {
-  height: auto;
-  margin-top: 4px;
-  padding: 0;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  color: #ff297d;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.2;
 }
 
 .carousel-dots {
@@ -959,13 +881,11 @@
 
 .detail-fallback-heading p {
   color: #c00050;
-  font-family: 'Figtree', sans-serif;
   font-size: 12px;
   line-height: 16px;
 }
 
 .detail-fallback-heading h1 {
-  font-family: 'Figtree', sans-serif;
   font-size: 20px;
   font-weight: 700;
   line-height: 28px;
@@ -973,7 +893,6 @@
 
 .detail-fallback-heading span {
   max-width: 356px;
-  font-family: 'Figtree', sans-serif;
   font-size: 14px;
   font-weight: 500;
   line-height: 20px;
@@ -996,7 +915,6 @@
 
 .restaurant-header h3 {
   margin-top: 4px;
-  font-family: 'Figtree', sans-serif;
   font-size: 16px;
   font-weight: 700;
   line-height: 24px;
@@ -1006,7 +924,6 @@
 .restaurant-meta,
 .other-apps {
   color: #5d5d5d;
-  font-family: 'Figtree', sans-serif;
   font-size: 12px;
   line-height: 16px;
 }
@@ -1097,7 +1014,6 @@
   border-radius: 999px;
   background: #ff297d;
   color: #fff;
-  font-family: 'Figtree', sans-serif;
   font-size: 14px;
 }
 
@@ -1105,7 +1021,6 @@
   min-height: 40px;
   margin-top: 8px;
   color: #333;
-  font-family: 'Figtree', sans-serif;
   font-size: 14px;
   font-weight: 600;
   line-height: 20px;
@@ -1121,7 +1036,6 @@
   border-radius: 8px;
   background: #008a25;
   color: #fff;
-  font-family: 'Figtree', sans-serif;
   font-size: 14px;
   line-height: 20px;
 }

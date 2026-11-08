@@ -40,7 +40,6 @@ export const TASTE_OF_INDIA_FONTS = {
   medium: Fonts.FigtreeMedium,
   semiBold: Fonts.FigtreeSemiBold,
   bold: Fonts.FigtreeBold,
-  display: Fonts.FrauncesSemiBold,
 } as const;
 
 export const TASTE_OF_INDIA_SHEET_SHADOW =

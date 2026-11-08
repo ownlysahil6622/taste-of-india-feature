@@ -286,7 +286,7 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
         </div>
         <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-[calc(50%-143.53px)] top-[calc(50%+16.65px)]" data-node-id="2642:2722">
           <div className="bg-white content-stretch flex items-center justify-center mr-[-1px] overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2651:4195">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2651:4196" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2651:4196" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Maharashtra
             </p>
           </div>
@@ -350,7 +350,7 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2651:4192">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2651:4193">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2651:4193">
                   6
                 </p>
               </div>
@@ -418,14 +418,14 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2535">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2536">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2536">
                   2
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-white content-stretch flex items-center justify-center overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2537">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2538" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2538" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Telangana
             </p>
           </div>
@@ -491,14 +491,14 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2561">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2562">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2562">
                   5
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-white content-stretch flex items-center justify-center overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2563">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2564" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2564" style={{ fontFeatureSettings: '"dlig" 1' }}>
               West Bengal
             </p>
           </div>
@@ -564,14 +564,14 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2587">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2588">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2588">
                   4
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-white content-stretch flex items-center justify-center overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2589">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2590" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2590" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Uttar Pradesh
             </p>
           </div>
@@ -637,14 +637,14 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2613">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2614">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2614">
                   5
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-white content-stretch flex items-center justify-center overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2615">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2616" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2616" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Punjab
             </p>
           </div>
@@ -710,14 +710,14 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2639">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2640">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2640">
                   6
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-white content-stretch flex items-center justify-center overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2641">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2642" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2642" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Andhra Pradesh
             </p>
           </div>
@@ -783,21 +783,21 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2665">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2666">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2666">
                   4
                 </p>
               </div>
             </div>
           </div>
           <div className="bg-white content-stretch flex items-center justify-center overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2667">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2668" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2668" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Tamil Nadu
             </p>
           </div>
         </div>
         <div className="absolute content-stretch flex inset-[63.12%_67.91%_25.53%_8.89%] items-center justify-center" data-node-id="2642:2669">
           <div className="bg-white content-stretch flex items-center justify-center mr-[-1px] overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2670">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2671" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2671" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Karnataka
             </p>
           </div>
@@ -861,7 +861,7 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2693">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2694">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2694">
                   5
                 </p>
               </div>
@@ -870,7 +870,7 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
         </div>
         <div className="absolute content-stretch flex inset-[83.73%_63.57%_4.92%_16.7%] items-center justify-center" data-node-id="2642:2695">
           <div className="bg-white content-stretch flex items-center justify-center mr-[-1px] overflow-clip px-[6px] relative rounded-[12px] shadow-[0px_16px_48px_0px_rgba(0,0,0,0.14),0px_8px_24px_0px_rgba(0,0,0,0.1)] shrink-0" data-node-id="2642:2696">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2697" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[18px] relative shrink-0 text-[10px] text-black tracking-[-0.2px] whitespace-nowrap" data-node-id="2642:2697" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Kerala
             </p>
           </div>
@@ -934,7 +934,7 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
                 </div>
               </div>
               <div className="bg-white col-1 ml-[33.17px] mt-0 relative rounded-[888px] row-1 size-[16px]" data-node-id="2642:2719">
-                <p className="[word-break:break-word] absolute font-['Figtree'] font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2720">
+                <p className="[word-break:break-word] absolute font-bold leading-[normal] left-[4.89px] right-[5.78px] text-[10.667px] text-black top-[1.78px] tracking-[-0.64px]" data-node-id="2642:2720">
                   3
                 </p>
               </div>
@@ -949,7 +949,7 @@ export default function MapArtwork({ selectedState }: { selectedState?: string }
             <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgHandTap2} />
           </div>
           <div className="content-stretch flex flex-col items-center relative shrink-0 w-[278px]" data-node-id="2683:161">
-            <p className="[word-break:break-word] font-['Figtree'] font-medium leading-[normal] relative shrink-0 text-[#5d5d5d] text-[15px] text-center w-full" data-node-id="2683:162" style={{ fontFeatureSettings: '"dlig" 1' }}>
+            <p className="[word-break:break-word] font-medium leading-[normal] relative shrink-0 text-[#5d5d5d] text-[15px] text-center w-full" data-node-id="2683:162" style={{ fontFeatureSettings: '"dlig" 1' }}>
               Tap on state to discover regional flavours
             </p>
           </div>

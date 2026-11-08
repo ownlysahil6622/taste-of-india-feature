@@ -9,29 +9,16 @@ import {
   type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from "react";
+import cutoutFiles from "virtual:card-cutouts";
 import MapArtwork from "./MapArtwork";
 
 type Dish = {
   name: string;
   image: string;
   banner?: string;
-  /** Transparent 450x500 dish cut-out shown on the sheet card instead of the banner crop. */
+  /** Transparent 450x500 cut-out for the sheet card. Filled in automatically (see withCutout). */
   cardImage?: string;
   description: string;
-};
-
-/**
- * x/y/width: the source region whose width fills the card. height: how much of the source to show
- * from y before cutting off (hides text baked into a banner); fillColor fills the card below that.
- */
-type CardCrop = {
-  sourceWidth: number;
-  sourceHeight: number;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  fillColor: string;
 };
 
 const DISH_CARD_WIDTH = 152;
@@ -39,21 +26,65 @@ const DISH_CARD_GAP = 8;
 // Point in the card the photo zooms around on hover: roughly the centre of the plate.
 const CARD_FOCUS = { x: 76, y: 48 };
 
-function cardCropStyle(crop: CardCrop): CSSProperties {
-  const scale = DISH_CARD_WIDTH / crop.width;
-  const left = -crop.x * scale;
-  const top = -crop.y * scale;
-  return {
-    position: "absolute",
-    left,
-    top,
-    width: crop.sourceWidth * scale,
-    height: crop.sourceHeight * scale,
-    maxWidth: "none",
-    objectFit: "fill",
-    clipPath: `inset(0 0 ${(crop.sourceHeight - crop.y - crop.height) * scale}px 0)`,
-    transformOrigin: `${CARD_FOCUS.x - left}px ${CARD_FOCUS.y - top}px`,
-  };
+type Size = { width: number; height: number };
+type CardImage = { src: string; style: CSSProperties };
+
+// Cut-outs share one 450x500 frame with the dish between x 30–417 and y 41–278. A 539px-wide window
+// centred on x 225, from y 23.6 (scale ≈0.282), puts the dish at card y ≈5–72, above the text.
+const CUTOUT_SIZE: Size = { width: 450, height: 500 };
+const CUTOUT_WINDOW = { x: -44.5, y: 23.6, width: 539 };
+
+// Fallback until a cut-out exists: the dish from the banner as a rounded photo in the top of the
+// card. Banners are 510px tall with the dish centred and ending by y≈357 (their own text starts at
+// y≈360), so a 363x192 window from y 165 fills the 136x72 box.
+const BANNER_HEIGHT = 510;
+const FALLBACK_BOX = { left: 8, top: 8, width: 136, height: 72, radius: 8 };
+
+/**
+ * Scales an image so its `window` (source px) lands at the card position box.left/top, box.width
+ * wide. With a box height the image is also clipped to that box with rounded corners.
+ */
+function placeCardImage(
+  source: Size,
+  window: { x: number; y: number; width: number },
+  box: { left: number; top: number; width: number; height?: number; radius?: number },
+): CSSProperties {
+  const scale = box.width / window.width;
+  const left = box.left - window.x * scale;
+  const top = box.top - window.y * scale;
+  const width = source.width * scale;
+  const height = source.height * scale;
+  const clip =
+    box.height === undefined
+      ? undefined
+      : `inset(${box.top - top}px ${left + width - box.left - box.width}px ${top + height - box.top - box.height}px ${box.left - left}px round ${box.radius ?? 0}px)`;
+  return { left, top, width, height, clipPath: clip, transformOrigin: `${CARD_FOCUS.x - left}px ${CARD_FOCUS.y - top}px` };
+}
+
+/** The image shown on a dish card: its cut-out if there is one, otherwise a crop of its banner. */
+function getCardImage(dish: Dish, state: StateData): CardImage {
+  if (dish.cardImage) {
+    return { src: dish.cardImage, style: placeCardImage(CUTOUT_SIZE, CUTOUT_WINDOW, { left: 0, top: 0, width: DISH_CARD_WIDTH }) };
+  }
+  if (dish.banner) {
+    const window = { x: state.bannerWidth / 2 - 181.5, y: 165, width: 363 };
+    return { src: dish.banner, style: placeCardImage({ width: state.bannerWidth, height: BANNER_HEIGHT }, window, FALLBACK_BOX) };
+  }
+  const { radius, ...box } = FALLBACK_BOX;
+  return { src: dish.image, style: { ...box, objectFit: "cover", borderRadius: radius } };
+}
+
+// Cut-outs are picked up by file name: public/assets/cards/cutouts/<slug>.png, where the slug is the
+// dish name in lowercase with "&" removed and spaces turned into hyphens ("Dal Makhni" → dal-makhni).
+const CUTOUTS = new Set(cutoutFiles);
+
+function dishSlug(name: string) {
+  return name.toLowerCase().replace(/&/g, "").trim().replace(/\s+/g, "-");
+}
+
+function withCutout(dish: Dish): Dish {
+  const file = `${dishSlug(dish.name)}.png`;
+  return dish.cardImage || !CUTOUTS.has(file) ? dish : { ...dish, cardImage: `/assets/cards/cutouts/${file}` };
 }
 
 type StateData = {
@@ -67,20 +98,7 @@ type StateData = {
   dishes: Dish[];
 };
 
-// Dish cards reuse each dish's banner. Every banner is 510px tall with the same layout: dish centred
-// horizontally, ending by y≈356, and the banner's own text starting at y≈360. Some states' banners
-// are padded wider (587–635px), so the crop is centred on the banner's width: a 303px-wide window
-// from y 175, cut off at y 357 with the rest of the card filled in the banner's pale pink.
-function bannerCardCrop(bannerWidth: number): CardCrop {
-  return { sourceWidth: bannerWidth, sourceHeight: 510, x: bannerWidth / 2 - 151.5, y: 175, width: 303, height: 182, fillColor: "#ffe9f3" };
-}
-
-// Cut-out card images share one 450x500 frame with the dish between x 30–417 and y 41–278, so one
-// crop fits them all. A 539px-wide window centred on x 225, from y 23.6 (scale ≈0.282, 15% bigger
-// than the earlier 620px window) puts the dish at card y ≈5–72, above the text block, on a #F3F3F3 card.
-const CUTOUT_CARD_CROP: CardCrop = { sourceWidth: 450, sourceHeight: 500, x: -44.5, y: 23.6, width: 539, height: 476.4, fillColor: "#F3F3F3" };
-
-const states: StateData[] = [
+const stateData: StateData[] = [
   {
     name: "Punjab",
     illustration: "/assets/b54b9.png",
@@ -89,11 +107,11 @@ const states: StateData[] = [
     marker: { x: 115, y: 266, image: "/assets/1af0b.png", count: 5 },
     bannerWidth: 587,
     dishes: [
-      { name: "Amritsari Kulche", image: "/assets/cards/punjab-amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", cardImage: "/assets/cards/cutouts/amritsari-kulche.png", description: "Crisp stuffed kulcha with butter & chole" },
-      { name: "Butter Chicken", image: "/assets/cards/punjab-butter-chicken.png", banner: "/assets/banners/butter-chicken.png", cardImage: "/assets/cards/cutouts/butter-chicken.png", description: "Tandoori chicken in a silky makhani gravy" },
-      { name: "Chole Bhature", image: "/assets/cards/punjab-chole-bhature.png", banner: "/assets/banners/chole-bhature.png", cardImage: "/assets/cards/cutouts/chole-bhature.png", description: "Puffy fried bhature with spicy chickpeas" },
-      { name: "Dal Makhni", image: "/assets/cards/punjab-dal-makhni.png", banner: "/assets/banners/dal-makhni.png", cardImage: "/assets/cards/cutouts/dal-makhni.png", description: "Black lentils slow-cooked with cream" },
-      { name: "Lassi", image: "/assets/cards/punjab-lassi.png", banner: "/assets/banners/lassi.png", cardImage: "/assets/cards/cutouts/lassi.png", description: "Thick, chilled yoghurt drink with malai" },
+      { name: "Amritsari Kulche", image: "/assets/cards/punjab-amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", description: "Crisp stuffed kulcha with butter & chole" },
+      { name: "Butter Chicken", image: "/assets/cards/punjab-butter-chicken.png", banner: "/assets/banners/butter-chicken.png", description: "Tandoori chicken in a silky makhani gravy" },
+      { name: "Chole Bhature", image: "/assets/cards/punjab-chole-bhature.png", banner: "/assets/banners/chole-bhature.png", description: "Puffy fried bhature with spicy chickpeas" },
+      { name: "Dal Makhni", image: "/assets/cards/punjab-dal-makhni.png", banner: "/assets/banners/dal-makhni.png", description: "Black lentils slow-cooked with cream" },
+      { name: "Lassi", image: "/assets/cards/punjab-lassi.png", banner: "/assets/banners/lassi.png", description: "Thick, chilled yoghurt drink with malai" },
     ],
   },
   {
@@ -217,6 +235,8 @@ const states: StateData[] = [
     ],
   },
 ];
+
+const states: StateData[] = stateData.map((state) => ({ ...state, dishes: state.dishes.map(withCutout) }));
 
 // Pins whose label sits on the left of the marker (the rest have it on the right).
 const LABEL_LEFT_STATES = new Set(["Maharashtra", "Karnataka", "Kerala"]);
@@ -420,7 +440,6 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
   const carouselRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef(0);
   const [active, setActive] = useState(0);
-  const crop = bannerCardCrop(state.bannerWidth);
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
@@ -441,31 +460,23 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
   return (
     <>
       <div ref={carouselRef} className="dish-carousel" role="list" onScroll={handleScroll}>
-        {state.dishes.map((dish, index) => (
-          <div className="dish-slot" role="listitem" key={dish.name} style={{ "--card-order": index } as CSSProperties}>
-            <button
-              type="button"
-              className={`dish-card ${dish.cardImage ? "is-cutout" : ""}`}
-              style={dish.cardImage ? { background: CUTOUT_CARD_CROP.fillColor } : dish.banner ? { background: crop.fillColor } : undefined}
-              onClick={() => onSelectDish(dish)}
-            >
-              {/* Cut-out image if the dish has one, else its banner (cropped to the dish), else its card image. */}
-              <img
-                src={dish.cardImage ?? dish.banner ?? dish.image}
-                alt=""
-                style={dish.cardImage ? { ...cardCropStyle(CUTOUT_CARD_CROP), clipPath: "none" } : dish.banner ? cardCropStyle(crop) : undefined}
-              />
-              <span className="dish-copy">
-                {/* Names over 14 characters drop to 15px and may wrap to 2 lines instead of being cut off. */}
-                <strong className={dish.name.length > 14 ? "is-long" : undefined}>{dish.name}</strong>
-                <span>{dish.description}</span>
-                <small>
-                  Explore <b aria-hidden="true">→</b>
-                </small>
-              </span>
-            </button>
-          </div>
-        ))}
+        {state.dishes.map((dish, index) => {
+          const image = getCardImage(dish, state);
+          return (
+            <div className="dish-slot" role="listitem" key={dish.name} style={{ "--card-order": index } as CSSProperties}>
+              <button type="button" className="dish-card" onClick={() => onSelectDish(dish)}>
+                <img src={image.src} alt="" style={image.style} />
+                <span className="dish-copy">
+                  <strong>{dish.name}</strong>
+                  <span>{dish.description}</span>
+                  <small>
+                    Explore <b aria-hidden="true">→</b>
+                  </small>
+                </span>
+              </button>
+            </div>
+          );
+        })}
       </div>
       <div className="carousel-dots" aria-hidden="true">
         {state.dishes.map((dish, index) => (
