@@ -29,53 +29,53 @@ const CARD_MEDIA = { width: 150, height: 78 };
 const CARD_FOCUS = { x: CARD_MEDIA.width / 2, y: CARD_MEDIA.height / 2 };
 
 type Size = { width: number; height: number };
-type CardImage = { src: string; style: CSSProperties };
+type CardImage = { src: string; style?: CSSProperties };
 
-// Cut-outs share one 450x500 frame (or the same 9:10 frame at a smaller size, e.g. 333x370; it is
-// scaled to fit) with the dish between x 30–417 and y 41–278. A 539px-wide window
-// centred on x 225, from y 23.6, shown 152px wide (scale ≈0.282), puts the dish at panel y ≈3–70.
-const CUTOUT_SIZE: Size = { width: 450, height: 500 };
-const CUTOUT_WINDOW = { x: -44.5, y: 23.6, width: 539 };
+// Cut-outs are transparent PNGs with the dish centred in the file (the 45 current ones are 300x165).
+// .dish-media centres them in the panel with flexbox at a fixed 114x63 size (see .dish-media > img).
 
-// Fallback until a cut-out exists: the dish from the banner as a rounded photo centred in the image
-// panel. Banners are 510px tall with the dish centred and ending by y≈357 (their own text starts at
-// y≈360), so a 390x192 window from y 165 fills the 134x66 box.
+// Fallback until a cut-out exists: the dish from the banner as a rounded photo, centred in the
+// 150x78 image panel. Banners are 510px tall with the dish centred and ending by y≈357 (their own
+// text starts at y≈360), so a 390x192 window from y 165 fills the 134x66 box.
 const BANNER_HEIGHT = 510;
-const FALLBACK_BOX = { left: 8, top: 6, width: 134, height: 66, radius: 8 };
+const FALLBACK_BOX = {
+  left: (CARD_MEDIA.width - 134) / 2,
+  top: (CARD_MEDIA.height - 66) / 2,
+  width: 134,
+  height: 66,
+  radius: 8,
+};
 
 /**
- * Scales an image so its `window` (source px) lands at the image-panel position box.left/top, box.width
- * wide. With a box height the image is also clipped to that box with rounded corners.
+ * Scales an image so its `window` (source px) lands on `box` in the image panel, clipped to the box
+ * with rounded corners.
  */
-function placeCardImage(
-  source: Size,
-  window: { x: number; y: number; width: number },
-  box: { left: number; top: number; width: number; height?: number; radius?: number },
-): CSSProperties {
+function placeCardImage(source: Size, window: { x: number; y: number; width: number }, box: typeof FALLBACK_BOX): CSSProperties {
   const scale = box.width / window.width;
   const left = box.left - window.x * scale;
   const top = box.top - window.y * scale;
   const width = source.width * scale;
   const height = source.height * scale;
-  const clip =
-    box.height === undefined
-      ? undefined
-      : `inset(${box.top - top}px ${left + width - box.left - box.width}px ${top + height - box.top - box.height}px ${box.left - left}px round ${box.radius ?? 0}px)`;
-  return { left, top, width, height, clipPath: clip, transformOrigin: `${CARD_FOCUS.x - left}px ${CARD_FOCUS.y - top}px` };
+  return {
+    position: "absolute",
+    left,
+    top,
+    width,
+    height,
+    clipPath: `inset(${box.top - top}px ${left + width - box.left - box.width}px ${top + height - box.top - box.height}px ${box.left - left}px round ${box.radius}px)`,
+    transformOrigin: `${CARD_FOCUS.x - left}px ${CARD_FOCUS.y - top}px`,
+  };
 }
 
 /** The image shown on a dish card: its cut-out if there is one, otherwise a crop of its banner. */
 function getCardImage(dish: Dish, state: StateData): CardImage {
-  if (dish.cardImage) {
-    const box = { left: (CARD_MEDIA.width - DISH_CARD_WIDTH) / 2, top: -2, width: DISH_CARD_WIDTH };
-    return { src: dish.cardImage, style: placeCardImage(CUTOUT_SIZE, CUTOUT_WINDOW, box) };
-  }
+  if (dish.cardImage) return { src: dish.cardImage };
   if (dish.banner) {
     const window = { x: state.bannerWidth / 2 - 195, y: 165, width: 390 };
     return { src: dish.banner, style: placeCardImage({ width: state.bannerWidth, height: BANNER_HEIGHT }, window, FALLBACK_BOX) };
   }
   const { radius, ...box } = FALLBACK_BOX;
-  return { src: dish.image, style: { ...box, objectFit: "cover", borderRadius: radius } };
+  return { src: dish.image, style: { ...box, position: "absolute", objectFit: "cover", borderRadius: radius } };
 }
 
 // Cut-outs are picked up by file name: public/assets/cards/cutouts/<slug>.png, where the slug is the
