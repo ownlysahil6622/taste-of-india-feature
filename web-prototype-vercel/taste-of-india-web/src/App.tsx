@@ -15,6 +15,8 @@ type Dish = {
   name: string;
   image: string;
   banner?: string;
+  /** Transparent 450x500 dish cut-out shown on the sheet card instead of the banner crop. */
+  cardImage?: string;
   description: string;
 };
 
@@ -73,6 +75,10 @@ function bannerCardCrop(bannerWidth: number): CardCrop {
   return { sourceWidth: bannerWidth, sourceHeight: 510, x: bannerWidth / 2 - 151.5, y: 175, width: 303, height: 182, fillColor: "#ffe9f3" };
 }
 
+// Cut-out card images share one 450x500 frame with the dish between x 30–417 and y 41–278, so one
+// crop fits them all: a 400px-wide window from y 30, on a #F3F3F3 card.
+const CUTOUT_CARD_CROP: CardCrop = { sourceWidth: 450, sourceHeight: 500, x: 25, y: 30, width: 400, height: 470, fillColor: "#F3F3F3" };
+
 const states: StateData[] = [
   {
     name: "Punjab",
@@ -82,11 +88,11 @@ const states: StateData[] = [
     marker: { x: 115, y: 266, image: "/assets/1af0b.png", count: 5 },
     bannerWidth: 587,
     dishes: [
-      { name: "Amritsari Kulche", image: "/assets/cards/punjab-amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", description: "Crisp stuffed kulcha with butter & chole" },
-      { name: "Butter Chicken", image: "/assets/cards/punjab-butter-chicken.png", banner: "/assets/banners/butter-chicken.png", description: "Tandoori chicken in a silky makhani gravy" },
-      { name: "Chole Bhature", image: "/assets/cards/punjab-chole-bhature.png", banner: "/assets/banners/chole-bhature.png", description: "Puffy fried bhature with spicy chickpeas" },
-      { name: "Dal Makhni", image: "/assets/cards/punjab-dal-makhni.png", banner: "/assets/banners/dal-makhni.png", description: "Black lentils slow-cooked with cream" },
-      { name: "Lassi", image: "/assets/cards/punjab-lassi.png", banner: "/assets/banners/lassi.png", description: "Thick, chilled yoghurt drink with malai" },
+      { name: "Amritsari Kulche", image: "/assets/cards/punjab-amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", cardImage: "/assets/cards/cutouts/amritsari-kulche.png", description: "Crisp stuffed kulcha with butter & chole" },
+      { name: "Butter Chicken", image: "/assets/cards/punjab-butter-chicken.png", banner: "/assets/banners/butter-chicken.png", cardImage: "/assets/cards/cutouts/butter-chicken.png", description: "Tandoori chicken in a silky makhani gravy" },
+      { name: "Chole Bhature", image: "/assets/cards/punjab-chole-bhature.png", banner: "/assets/banners/chole-bhature.png", cardImage: "/assets/cards/cutouts/chole-bhature.png", description: "Puffy fried bhature with spicy chickpeas" },
+      { name: "Dal Makhni", image: "/assets/cards/punjab-dal-makhni.png", banner: "/assets/banners/dal-makhni.png", cardImage: "/assets/cards/cutouts/dal-makhni.png", description: "Black lentils slow-cooked with cream" },
+      { name: "Lassi", image: "/assets/cards/punjab-lassi.png", banner: "/assets/banners/lassi.png", cardImage: "/assets/cards/cutouts/lassi.png", description: "Thick, chilled yoghurt drink with malai" },
     ],
   },
   {
@@ -439,11 +445,15 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
             <button
               type="button"
               className="dish-card"
-              style={dish.banner ? { background: crop.fillColor } : undefined}
+              style={dish.cardImage ? { background: CUTOUT_CARD_CROP.fillColor } : dish.banner ? { background: crop.fillColor } : undefined}
               onClick={() => onSelectDish(dish)}
             >
-              {/* The card shows the dish's banner (cropped to the dish); dishes without a banner keep their card image. */}
-              <img src={dish.banner ?? dish.image} alt="" style={dish.banner ? cardCropStyle(crop) : undefined} />
+              {/* Cut-out image if the dish has one, else its banner (cropped to the dish), else its card image. */}
+              <img
+                src={dish.cardImage ?? dish.banner ?? dish.image}
+                alt=""
+                style={dish.cardImage ? cardCropStyle(CUTOUT_CARD_CROP) : dish.banner ? cardCropStyle(crop) : undefined}
+              />
               <span className="dish-copy">
                 {/* Names over 14 characters drop to 15px and may wrap to 2 lines instead of being cut off. */}
                 <strong className={dish.name.length > 14 ? "is-long" : undefined}>{dish.name}</strong>

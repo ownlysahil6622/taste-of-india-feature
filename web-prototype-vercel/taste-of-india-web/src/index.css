@@ -386,6 +386,15 @@
   background: #d9d9d9;
 }
 
+/* The sheet is white so the grey (#F3F3F3) cut-out dish cards stand out; the discovery tip keeps #F3F3F3. */
+.bottom-sheet {
+  background: #fff;
+}
+
+.sheet-handle {
+  background: #e0e0e0;
+}
+
 .tip-row {
   display: flex;
   align-items: center;
