@@ -56,14 +56,12 @@
   pointer-events: none;
 }
 
-.map-artwork > div {
-  border-radius: 0;
+.india-map,
+.india-map > svg {
+  position: absolute;
+  inset: 0;
+  display: block;
   overflow: visible;
-  background: transparent;
-}
-
-.map-artwork [data-node-id='2683:133'] {
-  display: none;
 }
 
 /* ---------- Map surface ---------- */
@@ -82,36 +80,18 @@
   animation: map-intro 400ms cubic-bezier(0.2, 0, 0, 1) both;
 }
 
-/* The design's original markers and labels are replaced by .pin elements. */
-.map-world :is(
-  [data-node-id='2642:2591'],
-  [data-node-id='2642:2565'],
-  [data-node-id='2642:2539'],
-  [data-node-id='2642:2722'],
-  [data-node-id='2642:2513'],
-  [data-node-id='2642:2617'],
-  [data-node-id='2642:2669'],
-  [data-node-id='2642:2643'],
-  [data-node-id='2642:2695']
-) {
-  display: none;
-}
-
 /* State shapes: the selected colour cross-fades in. */
-.map-world img {
+.india-map [data-state] > g {
   transition: opacity 280ms ease;
 }
 
-.map-world .state-layer-selected {
+.india-map .layer-selected,
+.india-map .is-selected .layer-dormant {
   opacity: 0;
 }
 
-.map-world .state-layer-selected.is-on {
+.india-map .is-selected .layer-selected {
   opacity: 1;
-}
-
-.map-world .state-layer-dormant.is-off {
-  opacity: 0;
 }
 
 .state-hitboxes {
@@ -352,10 +332,6 @@
   font-size: 14px;
   font-weight: 500;
   line-height: 18px;
-}
-
-.map-artwork [data-node-id='2693:293'] {
-  display: none;
 }
 
 .discovery-tip,

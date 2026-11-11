@@ -4,38 +4,31 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-const CUTOUT_DIR = path.resolve(__dirname, 'public/assets/cards/cutouts')
-
-// Exposes the PNG names in public/assets/cards/cutouts/ as `virtual:card-cutouts`, so the app knows
-// which dishes have a cut-out card image. (import.meta.glob would bundle copies of public files.)
-// In dev, adding or removing a file reloads the page.
-function cardCutouts(): Plugin {
-  const id = 'virtual:card-cutouts'
-  const resolvedId = '\0' + id
+// vercel.json caches everything under /assets/ for a year, because Vite names those files with a
+// hash of their content. A public/assets/ folder would be served at the same path without hashes,
+// so a replaced image could stay cached. Images belong in src/assets/ instead; this stops the build.
+function noPublicAssets(): Plugin {
   return {
-    name: 'card-cutouts',
-    resolveId: (source) => (source === id ? resolvedId : undefined),
-    load(loadId) {
-      if (loadId !== resolvedId) return
-      const files = fs.existsSync(CUTOUT_DIR) ? fs.readdirSync(CUTOUT_DIR).filter((file) => file.endsWith('.png')) : []
-      return `export default ${JSON.stringify(files)}`
-    },
-    configureServer(server) {
-      const refresh = (file: string) => {
-        if (path.dirname(file) !== CUTOUT_DIR) return
-        const module = server.moduleGraph.getModuleById(resolvedId)
-        if (module) server.moduleGraph.invalidateModule(module)
-        server.ws.send({ type: 'full-reload' })
+    name: 'no-public-assets',
+    buildStart() {
+      if (fs.existsSync(path.resolve(__dirname, 'public/assets'))) {
+        this.error('public/assets/ would be cached for a year by vercel.json. Put images in src/assets/ instead.')
       }
-      server.watcher.add(CUTOUT_DIR)
-      server.watcher.on('add', refresh)
-      server.watcher.on('unlink', refresh)
     },
   }
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), cardCutouts()],
+  plugins: [react(), tailwindcss(), noPublicAssets()],
+  build: {
+    rolldownOptions: {
+      output: {
+        // The map SVG (~390 KB) gets its own file: it downloads in parallel with the app code and
+        // stays cached when only the app code changes.
+        codeSplitting: { groups: [{ name: 'india-map', test: /india-map\.svg/ }] },
+      },
+    },
+  },
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
   },

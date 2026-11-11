@@ -9,14 +9,33 @@ import {
   type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from "react";
-import cutoutFiles from "virtual:card-cutouts";
 import MapArtwork from "./MapArtwork";
+import handTapImage from "./assets/hand-tap.webp";
+
+// Images live in src/assets/, so the build gives each one a URL with a hash of its content (e.g.
+// /assets/lassi-B2kq9d1x.webp). Browsers can cache those for a year, and a replaced image gets a
+// new URL, so nobody sees a stale copy. Each folder is looked up by file name without extension.
+function byName(files: Record<string, string>): Record<string, string> {
+  // A .webp wins over a .png with the same name (glob results are sorted, so it comes later).
+  return Object.fromEntries(Object.entries(files).map(([file, url]) => [file.replace(/^.*\/|\.\w+$/g, ""), url]));
+}
+const MARKERS = byName(import.meta.glob<string>("./assets/markers/*.{webp,png}", { eager: true, query: "?url", import: "default" }));
+const ILLUSTRATIONS = byName(import.meta.glob<string>("./assets/illustrations/*.{webp,png}", { eager: true, query: "?url", import: "default" }));
+const BANNERS = byName(import.meta.glob<string>("./assets/banners/*.{webp,png}", { eager: true, query: "?url", import: "default" }));
+const CUTOUTS = byName(import.meta.glob<string>("./assets/cutouts/*.{webp,png}", { eager: true, query: "?url", import: "default" }));
+const MENU_PHOTOS = byName(import.meta.glob<string>("./assets/menu/*.{webp,png}", { eager: true, query: "?url", import: "default" }));
+
+/** URL of an image in one of the folders above; a missing file stops the app with a clear error. */
+function asset(folder: Record<string, string>, name: string): string {
+  const url = folder[name];
+  if (!url) throw new Error(`Missing image "${name}" in src/assets/`);
+  return url;
+}
 
 type Dish = {
   name: string;
-  image: string;
-  banner?: string;
-  /** Transparent 450x500 cut-out for the sheet card. Filled in automatically (see withCutout). */
+  banner: string;
+  /** Transparent cut-out for the sheet card. Filled in automatically (see withCutout). */
   cardImage?: string;
   description: string;
 };
@@ -31,7 +50,7 @@ const CARD_FOCUS = { x: CARD_MEDIA.width / 2, y: CARD_MEDIA.height / 2 };
 type Size = { width: number; height: number };
 type CardImage = { src: string; style?: CSSProperties };
 
-// Cut-outs are transparent PNGs with the dish centred in the file (the 45 current ones are 300x165).
+// Cut-outs are transparent WebPs with the dish centred in the file (the 45 current ones are 300x165).
 // .dish-media centres them in the panel with flexbox at a fixed 114x63 size (see .dish-media > img).
 
 // Fallback until a cut-out exists: the dish from the banner as a rounded photo, centred in the
@@ -70,25 +89,30 @@ function placeCardImage(source: Size, window: { x: number; y: number; width: num
 /** The image shown on a dish card: its cut-out if there is one, otherwise a crop of its banner. */
 function getCardImage(dish: Dish, state: StateData): CardImage {
   if (dish.cardImage) return { src: dish.cardImage };
-  if (dish.banner) {
-    const window = { x: state.bannerWidth / 2 - 195, y: 165, width: 390 };
-    return { src: dish.banner, style: placeCardImage({ width: state.bannerWidth, height: BANNER_HEIGHT }, window, FALLBACK_BOX) };
-  }
-  const { radius, ...box } = FALLBACK_BOX;
-  return { src: dish.image, style: { ...box, position: "absolute", objectFit: "cover", borderRadius: radius } };
+  const window = { x: state.bannerWidth / 2 - 195, y: 165, width: 390 };
+  return { src: dish.banner, style: placeCardImage({ width: state.bannerWidth, height: BANNER_HEIGHT }, window, FALLBACK_BOX) };
 }
 
-// Cut-outs are picked up by file name: public/assets/cards/cutouts/<slug>.png, where the slug is the
+// Cut-outs are picked up by file name: src/assets/cutouts/<slug>.webp (or .png), where the slug is the
 // dish name in lowercase with "&" removed and spaces turned into hyphens ("Dal Makhni" → dal-makhni).
-const CUTOUTS = new Set(cutoutFiles);
 
 function dishSlug(name: string) {
   return name.toLowerCase().replace(/&/g, "").trim().replace(/\s+/g, "-");
 }
 
 function withCutout(dish: Dish): Dish {
-  const file = `${dishSlug(dish.name)}.png`;
-  return dish.cardImage || !CUTOUTS.has(file) ? dish : { ...dish, cardImage: `/assets/cards/cutouts/${file}` };
+  const cutout = CUTOUTS[dishSlug(dish.name)];
+  return dish.cardImage || !cutout ? dish : { ...dish, cardImage: cutout };
+}
+
+// Banners download when their state is tapped, so a dish page opens with its banner ready.
+const preloadedBanners = new Set<string>();
+function preloadBanners(state: StateData) {
+  for (const { banner } of state.dishes) {
+    if (preloadedBanners.has(banner)) continue;
+    preloadedBanners.add(banner);
+    new Image().src = banner;
+  }
 }
 
 type StateData = {
@@ -105,137 +129,137 @@ type StateData = {
 const stateData: StateData[] = [
   {
     name: "Punjab",
-    illustration: "/assets/b54b9.png",
+    illustration: asset(ILLUSTRATIONS, "punjab"),
     path: "M94 235 132 232 135 272 116 287 92 266Z",
     target: { left: "35%", top: "30%", width: "14%", height: "3.5%" },
-    marker: { x: 115, y: 266, image: "/assets/1af0b.png", count: 5 },
+    marker: { x: 115, y: 266, image: asset(MARKERS, "punjab"), count: 5 },
     bannerWidth: 587,
     dishes: [
-      { name: "Amritsari Kulche", image: "/assets/cards/punjab-amritsari-kulche.png", banner: "/assets/banners/amritsari-kulche.png", description: "Crisp stuffed kulcha with butter & chole" },
-      { name: "Butter Chicken", image: "/assets/cards/punjab-butter-chicken.png", banner: "/assets/banners/butter-chicken.png", description: "Tandoori chicken in a silky makhani gravy" },
-      { name: "Chole Bhature", image: "/assets/cards/punjab-chole-bhature.png", banner: "/assets/banners/chole-bhature.png", description: "Puffy fried bhature with spicy chickpeas" },
-      { name: "Dal Makhni", image: "/assets/cards/punjab-dal-makhni.png", banner: "/assets/banners/dal-makhni.png", description: "Black lentils slow-cooked with cream" },
-      { name: "Lassi", image: "/assets/cards/punjab-lassi.png", banner: "/assets/banners/lassi.png", description: "Thick, chilled yoghurt drink with malai" },
+      { name: "Amritsari Kulche", banner: asset(BANNERS, "amritsari-kulche"), description: "Crisp stuffed kulcha with butter & chole" },
+      { name: "Butter Chicken", banner: asset(BANNERS, "butter-chicken"), description: "Tandoori chicken in a silky makhani gravy" },
+      { name: "Chole Bhature", banner: asset(BANNERS, "chole-bhature"), description: "Puffy fried bhature with spicy chickpeas" },
+      { name: "Dal Makhni", banner: asset(BANNERS, "dal-makhni"), description: "Black lentils slow-cooked with cream" },
+      { name: "Lassi", banner: asset(BANNERS, "lassi"), description: "Thick, chilled yoghurt drink with malai" },
     ],
   },
   {
     name: "Uttar Pradesh",
-    illustration: "/assets/16a3a.png",
+    illustration: asset(ILLUSTRATIONS, "uttar-pradesh"),
     path: "M139 292 211 284 231 319 204 350 146 339Z",
     target: { left: "52%", top: "38%", width: "18%", height: "3.5%" },
-    marker: { x: 175, y: 330, image: "/assets/87b02.png", count: 4 },
+    marker: { x: 175, y: 330, image: asset(MARKERS, "uttar-pradesh"), count: 4 },
     bannerWidth: 635,
     dishes: [
-      { name: "Gahloti Kebab", image: "/assets/cards/uttar-pradesh-gahloti-kebab.png", banner: "/assets/banners/gahloti-kebab.png", description: "Melt-in-the-mouth Lucknowi kebabs" },
-      { name: "Awadhi Biryani", image: "/assets/cards/uttar-pradesh-awadhi-biryani.png", banner: "/assets/banners/awadhi-biryani.png", description: "Fragrant dum-cooked rice with tender meat" },
-      { name: "Nihari", image: "/assets/cards/uttar-pradesh-nihari.png", banner: "/assets/banners/nihari.png", description: "Slow-simmered meat stew, rich and spiced" },
+      { name: "Gahloti Kebab", banner: asset(BANNERS, "gahloti-kebab"), description: "Melt-in-the-mouth Lucknowi kebabs" },
+      { name: "Awadhi Biryani", banner: asset(BANNERS, "awadhi-biryani"), description: "Fragrant dum-cooked rice with tender meat" },
+      { name: "Nihari", banner: asset(BANNERS, "nihari"), description: "Slow-simmered meat stew, rich and spiced" },
     ],
   },
   {
     name: "West Bengal",
-    illustration: "/assets/e5130.png",
+    illustration: asset(ILLUSTRATIONS, "west-bengal"),
     path: "M274 343 306 346 311 403 282 413 270 381Z",
     target: { left: "78%", top: "44%", width: "22%", height: "3.5%" },
-    marker: { x: 288, y: 380, image: "/assets/4e4f7.png", count: 5 },
+    marker: { x: 288, y: 380, image: asset(MARKERS, "west-bengal"), count: 5 },
     bannerWidth: 596,
     dishes: [
-      { name: "Kosha Mangsho", image: "/assets/cards/west-bengal-kosha-mangsho.png", banner: "/assets/banners/kosha-mangsho.png", description: "Dark, slow-cooked Bengali mutton curry" },
-      { name: "Kolkata Biryani", image: "/assets/cards/west-bengal-kolkata-biryani.png", banner: "/assets/banners/kolkata-biryani.png", description: "Light, fragrant biryani with potato & egg" },
-      { name: "Kathi Roll", image: "/assets/cards/west-bengal-kathi-roll.png", banner: "/assets/banners/kathi-roll.png", description: "Flaky paratha rolled with spiced kebab" },
-      { name: "Mishti Doi", image: "/assets/cards/west-bengal-mishti-doi.png", banner: "/assets/banners/_candidate-kathi-roll-1.png", description: "Sweet set curd in a clay pot" },
+      { name: "Kosha Mangsho", banner: asset(BANNERS, "kosha-mangsho"), description: "Dark, slow-cooked Bengali mutton curry" },
+      { name: "Kolkata Biryani", banner: asset(BANNERS, "kolkata-biryani"), description: "Light, fragrant biryani with potato & egg" },
+      { name: "Kathi Roll", banner: asset(BANNERS, "kathi-roll"), description: "Flaky paratha rolled with spiced kebab" },
+      { name: "Mishti Doi", banner: asset(BANNERS, "_candidate-kathi-roll-1"), description: "Sweet set curd in a clay pot" },
     ],
   },
   {
     name: "Maharashtra",
-    illustration: "/assets/b1c0c.png",
+    illustration: asset(ILLUSTRATIONS, "maharashtra"),
     path: "M67 387 129 391 142 442 115 474 74 455Z",
     target: { left: "0%", top: "49%", width: "21%", height: "3.5%" },
-    marker: { x: 97, y: 426, image: "/assets/52a48.png", count: 6 },
+    marker: { x: 97, y: 426, image: asset(MARKERS, "maharashtra"), count: 6 },
     bannerWidth: 587,
     dishes: [
-      { name: "Vada Pav", image: "/assets/cards/maharashtra-vada-pav.png", banner: "/assets/banners/vada-pav.png", description: "Spiced potato fritter in soft, buttery pav" },
-      { name: "Misal Pav", image: "/assets/cards/maharashtra-misal-pav.png", banner: "/assets/banners/misal-pav.png", description: "Fiery sprout curry with farsan" },
-      { name: "Pav Bhaaji", image: "/assets/cards/maharashtra-pav-bhaaji.png", banner: "/assets/banners/pav-bhaaji.png", description: "Buttery mashed veg curry with toasted pav" },
-      { name: "Puran Poli", image: "/assets/cards/maharashtra-puran-poli.png", banner: "/assets/banners/puran-poli.png", description: "Sweet flatbread filled with jaggery & dal" },
-      { name: "Kolhapuri Mutton", image: "/assets/cards/maharashtra-kolhapuri-mutton.png", banner: "/assets/banners/kolhapuri-mutton.png", description: "Fiery mutton curry in bold Kolhapuri masala" },
+      { name: "Vada Pav", banner: asset(BANNERS, "vada-pav"), description: "Spiced potato fritter in soft, buttery pav" },
+      { name: "Misal Pav", banner: asset(BANNERS, "misal-pav"), description: "Fiery sprout curry with farsan" },
+      { name: "Pav Bhaaji", banner: asset(BANNERS, "pav-bhaaji"), description: "Buttery mashed veg curry with toasted pav" },
+      { name: "Puran Poli", banner: asset(BANNERS, "puran-poli"), description: "Sweet flatbread filled with jaggery & dal" },
+      { name: "Kolhapuri Mutton", banner: asset(BANNERS, "kolhapuri-mutton"), description: "Fiery mutton curry in bold Kolhapuri masala" },
     ],
   },
   {
     name: "Telangana",
-    illustration: "/assets/396c1.png",
+    illustration: asset(ILLUSTRATIONS, "telangana"),
     path: "M137 415 184 414 195 454 176 477 143 463Z",
     target: { left: "45%", top: "52%", width: "18%", height: "3.5%" },
-    marker: { x: 158, y: 454, image: "/assets/ab8bd.png", count: 2 },
+    marker: { x: 158, y: 454, image: asset(MARKERS, "telangana"), count: 2 },
     bannerWidth: 614,
     dishes: [
-      { name: "Hyderabadi Biryani", image: "/assets/cards/telangana-hyderabadi-biryani.png", banner: "/assets/banners/hyderabadi-biryani.png", description: "Saffron-scented dum-cooked biryani" },
-      { name: "Haleem", image: "/assets/cards/telangana-haleem.png", banner: "/assets/banners/haleem.png", description: "Slow-pounded wheat and meat, rich & hearty" },
-      { name: "Mirchi ka Salan", image: "/assets/cards/telangana-mirchi-ka-salan.png", banner: "/assets/banners/mirchi-ka-salan.png", description: "Green chillies in tangy peanut-sesame gravy" },
-      { name: "Double ka Meetha", image: "/assets/cards/telangana-double-ka-meetha.png", banner: "/assets/banners/double-ka-meetha.png", description: "Fried bread pudding soaked in saffron milk" },
-      { name: "Qubani ka Meetha", image: "/assets/cards/telangana-qubani-ka-meetha.png", banner: "/assets/banners/_candidate-double-ka-meetha-1.png", description: "Stewed apricots with fresh cream" },
+      { name: "Hyderabadi Biryani", banner: asset(BANNERS, "hyderabadi-biryani"), description: "Saffron-scented dum-cooked biryani" },
+      { name: "Haleem", banner: asset(BANNERS, "haleem"), description: "Slow-pounded wheat and meat, rich & hearty" },
+      { name: "Mirchi ka Salan", banner: asset(BANNERS, "mirchi-ka-salan"), description: "Green chillies in tangy peanut-sesame gravy" },
+      { name: "Double ka Meetha", banner: asset(BANNERS, "double-ka-meetha"), description: "Fried bread pudding soaked in saffron milk" },
+      { name: "Qubani ka Meetha", banner: asset(BANNERS, "_candidate-double-ka-meetha-1"), description: "Stewed apricots with fresh cream" },
     ],
   },
   {
     name: "Andhra Pradesh",
-    illustration: "/assets/e6def.png",
+    illustration: asset(ILLUSTRATIONS, "andhra-pradesh"),
     path: "M164 465 215 456 220 505 181 526 158 501Z",
     target: { left: "50%", top: "58%", width: "23%", height: "3.5%" },
-    marker: { x: 175, y: 500, image: "/assets/8d705.png", count: 6 },
+    marker: { x: 175, y: 500, image: asset(MARKERS, "andhra-pradesh"), count: 6 },
     bannerWidth: 596,
     dishes: [
-      { name: "Andhra Meal", image: "/assets/cards/andhra-pradesh-andhra-meal.png", banner: "/assets/banners/andhra-meal.png", description: "A fiery banana-leaf feast of curries & rice" },
-      { name: "Gongura Mutton", image: "/assets/cards/andhra-pradesh-gongura-mutton.png", banner: "/assets/banners/gongura-mutton.png", description: "Tangy sorrel-leaf mutton curry" },
-      { name: "Pesarattu Dish", image: "/assets/cards/andhra-pradesh-pesarattu-dish.png", banner: "/assets/banners/pesarattu-dish.png", description: "Crisp green-gram dosa with ginger chutney" },
-      { name: "Guntur Chilli Chicken", image: "/assets/cards/andhra-pradesh-guntur-chilli-chicken.png", banner: "/assets/banners/guntur-chilli-chicken.png", description: "Fiery chicken tossed in Guntur chillies" },
-      { name: "Ulavacharu Chicken Biryani", image: "/assets/cards/andhra-pradesh-ulavacharu-chicken-biryani.png", banner: "/assets/banners/ulavacharu-chicken-biryani.png", description: "Biryani with smoky horse-gram rasam" },
-      { name: "Natu Kodi Pulusu", image: "/assets/cards/andhra-pradesh-natu-kodi-pulusu.png", banner: "/assets/banners/natu-kodi-pulusu.png", description: "Country chicken in a tangy, spicy gravy" },
+      { name: "Andhra Meal", banner: asset(BANNERS, "andhra-meal"), description: "A fiery banana-leaf feast of curries & rice" },
+      { name: "Gongura Mutton", banner: asset(BANNERS, "gongura-mutton"), description: "Tangy sorrel-leaf mutton curry" },
+      { name: "Pesarattu Dish", banner: asset(BANNERS, "pesarattu-dish"), description: "Crisp green-gram dosa with ginger chutney" },
+      { name: "Guntur Chilli Chicken", banner: asset(BANNERS, "guntur-chilli-chicken"), description: "Fiery chicken tossed in Guntur chillies" },
+      { name: "Ulavacharu Chicken Biryani", banner: asset(BANNERS, "ulavacharu-chicken-biryani"), description: "Biryani with smoky horse-gram rasam" },
+      { name: "Natu Kodi Pulusu", banner: asset(BANNERS, "natu-kodi-pulusu"), description: "Country chicken in a tangy, spicy gravy" },
     ],
   },
   {
     name: "Karnataka",
-    illustration: "/assets/f1385.png",
+    illustration: asset(ILLUSTRATIONS, "karnataka"),
     path: "M78 458 128 457 145 523 121 550 91 519Z",
     target: { left: "4%", top: "59%", width: "20%", height: "3.5%" },
-    marker: { x: 97, y: 507, image: "/assets/13c75.png", count: 5 },
+    marker: { x: 97, y: 507, image: asset(MARKERS, "karnataka"), count: 5 },
     bannerWidth: 587,
     dishes: [
-      { name: "Benne Masala Dosa", image: "/assets/cards/karnataka-benne-masala-dosa.png", banner: "/assets/banners/benne-masala-dosa.png", description: "Butter-crisp dosa with spiced potato" },
-      { name: "Bisi Bele Bath", image: "/assets/cards/karnataka-bisi-bele-bath.png", banner: "/assets/banners/bisi-bele-bath.png", description: "Spicy lentil rice with tamarind & ghee" },
-      { name: "Donne Biryani", image: "/assets/cards/karnataka-donne-biryani.png", banner: "/assets/banners/donne-biryani.png", description: "Herby biryani served in a leaf bowl" },
-      { name: "Mangalorian Buns", image: "/assets/cards/karnataka-mangalorian-buns.png", banner: "/assets/banners/mangalorian-buns.png", description: "Soft, sweet banana puris from Mangaluru" },
-      { name: "Kori Rotti", image: "/assets/cards/karnataka-kori-rotti.png", banner: "/assets/banners/kori-rotti.png", description: "Spicy chicken curry with crisp rice wafers" },
+      { name: "Benne Masala Dosa", banner: asset(BANNERS, "benne-masala-dosa"), description: "Butter-crisp dosa with spiced potato" },
+      { name: "Bisi Bele Bath", banner: asset(BANNERS, "bisi-bele-bath"), description: "Spicy lentil rice with tamarind & ghee" },
+      { name: "Donne Biryani", banner: asset(BANNERS, "donne-biryani"), description: "Herby biryani served in a leaf bowl" },
+      { name: "Mangalorian Buns", banner: asset(BANNERS, "mangalorian-buns"), description: "Soft, sweet banana puris from Mangaluru" },
+      { name: "Kori Rotti", banner: asset(BANNERS, "kori-rotti"), description: "Spicy chicken curry with crisp rice wafers" },
     ],
   },
   {
     name: "Tamil Nadu",
-    illustration: "/assets/571a8.png",
+    illustration: asset(ILLUSTRATIONS, "tamil-nadu"),
     path: "M132 527 180 517 180 579 149 608 130 573Z",
     target: { left: "46%", top: "64%", width: "20%", height: "3.5%" },
-    marker: { x: 158, y: 550, image: "/assets/032d7.png", count: 4 },
+    marker: { x: 158, y: 550, image: asset(MARKERS, "tamil-nadu"), count: 4 },
     bannerWidth: 587,
     dishes: [
-      { name: "Chetinad Chicken", image: "/assets/cards/tamil-nadu-chetinad-chicken.png", banner: "/assets/banners/chetinad-chicken.png", description: "Peppery chicken in Chettinad masala" },
-      { name: "Kothu Parotta", image: "/assets/cards/tamil-nadu-kothu-parotta.png", banner: "/assets/banners/kothu-parotta.png", description: "Shredded parotta tossed with egg" },
-      { name: "Pongal", image: "/assets/cards/tamil-nadu-pongal.png", banner: "/assets/banners/pongal.png", description: "Peppery rice and lentils in golden ghee" },
-      { name: "Idli with Podi", image: "/assets/cards/tamil-nadu-idli-with-podi.png", banner: "/assets/banners/idli-with-podi.png", description: "Soft idlis dusted with spicy gunpowder" },
-      { name: "Dindigul Biryani", image: "/assets/cards/tamil-nadu-dindigul-biryani.png", banner: "/assets/banners/dindigul-biryani.png", description: "Spicy short-grain mutton biryani" },
-      { name: "Kari Dosa", image: "/assets/cards/tamil-nadu-kari-dosa.png", banner: "/assets/banners/kari-dosa.png", description: "Dosa topped with egg and spiced mince" },
+      { name: "Chetinad Chicken", banner: asset(BANNERS, "chetinad-chicken"), description: "Peppery chicken in Chettinad masala" },
+      { name: "Kothu Parotta", banner: asset(BANNERS, "kothu-parotta"), description: "Shredded parotta tossed with egg" },
+      { name: "Pongal", banner: asset(BANNERS, "pongal"), description: "Peppery rice and lentils in golden ghee" },
+      { name: "Idli with Podi", banner: asset(BANNERS, "idli-with-podi"), description: "Soft idlis dusted with spicy gunpowder" },
+      { name: "Dindigul Biryani", banner: asset(BANNERS, "dindigul-biryani"), description: "Spicy short-grain mutton biryani" },
+      { name: "Kari Dosa", banner: asset(BANNERS, "kari-dosa"), description: "Dosa topped with egg and spiced mince" },
     ],
   },
   {
     name: "Kerala",
-    illustration: "/assets/a44f1.png",
+    illustration: asset(ILLUSTRATIONS, "kerala"),
     path: "M98 542 122 541 133 608 117 643 102 600Z",
     target: { left: "13%", top: "69%", width: "15%", height: "3.5%" },
-    marker: { x: 120, y: 594, image: "/assets/50eed.png", count: 3 },
+    marker: { x: 120, y: 594, image: asset(MARKERS, "kerala"), count: 3 },
     bannerWidth: 587,
     dishes: [
-      { name: "Appam with Stew", image: "/assets/cards/kerela-appam-with-stew.png", banner: "/assets/banners/appam-with-stew.png", description: "Lacy appams with a mild coconut stew" },
-      { name: "Malabar Biryani", image: "/assets/cards/kerela-malabar-biryani.png", banner: "/assets/banners/malabar-biryani.png", description: "Kaima-rice biryani with crisp fried onions" },
-      { name: "Puttu & Kadala Curry", image: "/assets/cards/kerela-puttu-kadala-curry.png", banner: "/assets/banners/puttu-kadala-curry.png", description: "Steamed rice puttu with chickpea curry" },
-      { name: "Kappa & Meen Curry", image: "/assets/cards/kerela-kappa-meen-curry.png", banner: "/assets/banners/kappa-meen-curry.png", description: "Tapioca mash with fiery red fish curry" },
-      { name: "Karimeen Pollichathu", image: "/assets/cards/kerela-karimeen-pollichathu.png", banner: "/assets/banners/karimeen-pollichathu.png", description: "Pearl spot fish roasted in banana leaf" },
-      { name: "Pazham Pori", image: "/assets/89fe7.png", banner: "/assets/banners/pazham-pori.png", description: "Sweet ripe-banana fritters, crisp & golden" },
+      { name: "Appam with Stew", banner: asset(BANNERS, "appam-with-stew"), description: "Lacy appams with a mild coconut stew" },
+      { name: "Malabar Biryani", banner: asset(BANNERS, "malabar-biryani"), description: "Kaima-rice biryani with crisp fried onions" },
+      { name: "Puttu & Kadala Curry", banner: asset(BANNERS, "puttu-kadala-curry"), description: "Steamed rice puttu with chickpea curry" },
+      { name: "Kappa & Meen Curry", banner: asset(BANNERS, "kappa-meen-curry"), description: "Tapioca mash with fiery red fish curry" },
+      { name: "Karimeen Pollichathu", banner: asset(BANNERS, "karimeen-pollichathu"), description: "Pearl spot fish roasted in banana leaf" },
+      { name: "Pazham Pori", banner: asset(BANNERS, "pazham-pori"), description: "Sweet ripe-banana fritters, crisp & golden" },
     ],
   },
 ];
@@ -409,17 +433,40 @@ function MapPin({
   );
 }
 
+// Illustrations that have finished loading in this visit.
+const loadedIllustrations = new Set<string>();
+
+/**
+ * Each state's illustration downloads the first time that state is opened. While a new one loads,
+ * the previous illustration stays on screen, then it swaps instantly, as before.
+ */
 function StateIllustration({ state, className = "" }: { state: StateData; className?: string }) {
+  const [opened, setOpened] = useState(() => [state.name]);
+  const [shown, setShown] = useState(() => (loadedIllustrations.has(state.name) ? state.name : null));
+  if (!opened.includes(state.name)) setOpened([...opened, state.name]);
+
+  useEffect(() => {
+    if (loadedIllustrations.has(state.name)) setShown(state.name);
+  }, [state.name]);
+
+  const handleLoad = (name: string) => {
+    loadedIllustrations.add(name);
+    if (name === state.name) setShown(name);
+  };
+
   return (
     <div className={`state-illustration ${className}`}>
-      {states.map((option) => (
-        <img
-          key={option.name}
-          className={`illustration-image illustration-${option.name.toLowerCase().replace(/\s+/g, "-")} ${option.name === state.name ? "is-active" : ""}`}
-          src={option.illustration}
-          alt=""
-        />
-      ))}
+      {states
+        .filter((option) => opened.includes(option.name))
+        .map((option) => (
+          <img
+            key={option.name}
+            className={`illustration-image illustration-${option.name.toLowerCase().replace(/\s+/g, "-")} ${option.name === shown ? "is-active" : ""}`}
+            src={option.illustration}
+            alt=""
+            onLoad={() => handleLoad(option.name)}
+          />
+        ))}
     </div>
   );
 }
@@ -432,7 +479,7 @@ function DiscoveryTip({ onHeight }: { onHeight: (height: number) => void }) {
       <span className="tip-handle" />
       <div className="tip-row">
         <span className="tip-hand" aria-hidden="true">
-          <img src="/assets/93d0c.png" alt="" />
+          <img src={handTapImage} alt="" />
         </span>
         <p>Tap a state to explore its famous dishes</p>
       </div>
@@ -446,6 +493,26 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
   const [active, setActive] = useState(0);
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
+
+  // Card images load as their card comes within half a card of the visible area, so opening a
+  // state only downloads the cards on screen (the first two plus the one peeking in).
+  // (loading="lazy" doesn't help here: browsers start any image within ~1250px, i.e. all cards.)
+  const [reveal, setReveal] = useState({ name: state.name, count: 2 });
+  const revealed = reveal.name === state.name ? reveal.count : 2;
+  useEffect(() => {
+    const carousel = carouselRef.current;
+    if (!carousel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const last = Math.max(...entries.filter((entry) => entry.isIntersecting).map((entry) => Number((entry.target as HTMLElement).dataset.index)));
+        if (last < 0 || !Number.isFinite(last)) return;
+        setReveal((current) => ({ name: state.name, count: Math.max(current.name === state.name ? current.count : 2, last + 1) }));
+      },
+      { root: carousel, rootMargin: `0px ${DISH_CARD_WIDTH / 2}px` },
+    );
+    carousel.querySelectorAll(".dish-slot").forEach((slot) => observer.observe(slot));
+    return () => observer.disconnect();
+  }, [state.name]);
 
   const handleScroll = () => {
     cancelAnimationFrame(frameRef.current);
@@ -467,10 +534,10 @@ function DishCarousel({ state, onSelectDish }: { state: StateData; onSelectDish:
         {state.dishes.map((dish, index) => {
           const image = getCardImage(dish, state);
           return (
-            <div className="dish-slot" role="listitem" key={dish.name} style={{ "--card-order": index } as CSSProperties}>
+            <div className="dish-slot" role="listitem" key={dish.name} data-index={index} style={{ "--card-order": index } as CSSProperties}>
               <button type="button" className="dish-card" onClick={() => onSelectDish(dish)}>
                 <span className="dish-media">
-                  <img src={image.src} alt="" style={image.style} />
+                  <img src={index < revealed ? image.src : undefined} alt="" style={image.style} decoding="async" />
                 </span>
                 <span className="dish-copy">
                   <strong>{dish.name}</strong>
@@ -596,9 +663,9 @@ function BottomSheet({
 }
 
 const restaurantItems = [
-  { name: "Plain Idli", image: "/assets/18e54.png", price: "₹105", badge: "Bestseller" },
-  { name: "Ghee Sambar Button Idli", image: "/assets/69f6e.png", price: "₹165" },
-  { name: "Lemon Idli", image: "/assets/913d2.png", price: "₹165" },
+  { name: "Plain Idli", image: asset(MENU_PHOTOS, "plain-idli"), price: "₹105", badge: "Bestseller" },
+  { name: "Ghee Sambar Button Idli", image: asset(MENU_PHOTOS, "ghee-sambar-button-idli"), price: "₹165" },
+  { name: "Lemon Idli", image: asset(MENU_PHOTOS, "lemon-idli"), price: "₹165" },
 ];
 
 function RestaurantCard() {
@@ -616,7 +683,7 @@ function RestaurantCard() {
         {restaurantItems.map((item) => (
           <div className="menu-item" key={item.name}>
             <div className="menu-image">
-              <img src={item.image} alt="" />
+              <img src={item.image} alt="" loading="lazy" decoding="async" />
               {item.badge && <small>{item.badge}</small>}
               <button>Add</button>
             </div>
@@ -661,7 +728,7 @@ function DishDetail({
     >
       <div className="detail-scroll">
         <div className="detail-banner">
-          <img src={dish.banner ?? dish.image} alt="" />
+          <img src={dish.banner} alt="" fetchPriority="high" />
         </div>
         <div className="detail-results">
           {!dish.banner && (
@@ -736,6 +803,7 @@ export default function App() {
     setSelected(state);
     setMarkerPulse((pulse) => pulse + 1);
     hapticTick();
+    preloadBanners(state);
   };
 
   // The detail page opens as a new history entry, so the browser back button closes it too.
@@ -767,14 +835,6 @@ export default function App() {
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, [detail, closeDish]);
-
-  useEffect(() => {
-    states.forEach((state) => {
-      const illustration = new Image();
-      illustration.src = state.illustration;
-      illustration.decode?.().catch(() => undefined);
-    });
-  }, []);
 
   const focus = computeMapFocus(shellSize.width, shellSize.height, obstruction, tipHeight, selected ? selected.marker : null);
   const bounds = computeMapPanBounds(shellSize.height, obstruction, focus.scale, focus.x, focus.y, !selected);
@@ -834,7 +894,7 @@ export default function App() {
         onPointerUp={handlePointerEnd}
         onPointerCancel={handlePointerEnd}
       >
-        <div className="map-artwork map-world map-intro" aria-hidden="true">
+        <div className="map-artwork map-intro" aria-hidden="true">
           <MapArtwork selectedState={selected?.name} />
         </div>
         <svg className="state-hitboxes" viewBox="0 0 390 844" preserveAspectRatio="none">
