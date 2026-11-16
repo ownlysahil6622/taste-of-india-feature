@@ -25,12 +25,13 @@
 
 .app-shell {
   /* Map header geometry, shared with the dish detail back button so both back buttons line up. */
-  --header-height: 108px; /* HEADER_HEIGHT in App.tsx */
+  /* The header's height is measured in App.tsx for the map layout, so these can change freely. */
+  --header-height: 108px; /* excluding the status bar inset (--safe-top) */
   --header-pad-top: 40px;
   --header-pad-bottom: 12px;
-  --header-pad-x: 20px;
+  --header-pad-x: 16px;
   --header-border: 1px;
-  --back-size: 44px;
+  --back-size: 40px; /* tap area; the arrow inside is 24px */
   position: relative;
   width: min(100%, 430px);
   margin: 0 auto;
@@ -38,6 +39,14 @@
   height: 100dvh;
   overflow: hidden;
   background: #fff7fb;
+}
+
+/* Inside the Ownly app (html.in-app, set in ownlyHost.ts) the header sits right under the status bar:
+   8px + a 56px row (40px tap area / 44px text, centred, 8px below, 1px border). */
+html.in-app .app-shell {
+  --header-height: 64px;
+  --header-pad-top: 8px;
+  --header-pad-bottom: 8px;
 }
 
 .scene-transform {
@@ -296,13 +305,14 @@
   /* Grows by the status bar inset so the content row stays the same size below it. */
   height: calc(var(--header-height) + var(--safe-top));
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   padding: calc(var(--header-pad-top) + var(--safe-top)) var(--header-pad-x) var(--header-pad-bottom);
   border-bottom: var(--header-border) solid #efefef;
   background: #fff;
 }
 
-/* Shared look of both back buttons (map header and dish detail). */
+/* Shared look of both back buttons (map header and dish detail), matching the Ownly app's header:
+   a plain 24px arrow in a 40x40 tap area, no circle. */
 .back-button {
   display: grid;
   flex: none;
@@ -310,14 +320,22 @@
   height: var(--back-size);
   padding: 0;
   place-items: center;
-  border: 1px solid #e8e8e8;
-  border-radius: 50%;
-  background: #fff;
+  border: 0;
+  background: none;
+  color: #1a1a1a;
 }
 
 .map-header-text {
+  flex: 1;
   min-width: 0;
   text-align: left;
+}
+
+.map-header-text h1,
+.map-header-text p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .map-header-text h1 {
@@ -332,8 +350,8 @@
   margin: 2px 0 0;
   color: #6b6b6b;
   font-size: 14px;
-  font-weight: 500;
-  line-height: 18px;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .discovery-tip,
@@ -355,18 +373,19 @@
   animation: sheet-in 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Inside the Ownly app (html[data-ownly-host], set in ownlyHost.ts) the page draws under the
-   navigation bar, so the bottom padding is added on top of the safe area. In a browser the rules
+/* Inside the Ownly app (html.in-app) the page draws under the navigation bar. --safe-bottom is added
+   once, on whichever element touches the screen bottom: the tip (map), the sheet (state open), or
+   the dish results (dish page). The tip and sheet are never shown together. In a browser the rules
    above apply unchanged. */
-:root[data-ownly-host] .discovery-tip {
-  padding-bottom: calc(14px + var(--safe-bottom));
+html.in-app .discovery-tip {
+  padding-bottom: calc(12px + var(--safe-bottom));
 }
 
-:root[data-ownly-host] .bottom-sheet {
-  padding-bottom: calc(24px + var(--safe-bottom));
+html.in-app .bottom-sheet {
+  padding-bottom: calc(12px + var(--safe-bottom));
 }
 
-:root[data-ownly-host] .detail-results {
+html.in-app .detail-results {
   padding-bottom: calc(16px + var(--safe-bottom));
 }
 
@@ -876,7 +895,6 @@
       (var(--header-height) - var(--header-pad-top) - var(--header-pad-bottom) - var(--header-border) - var(--back-size)) / 2
   );
   left: var(--header-pad-x);
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
 }
 
 .detail-results {

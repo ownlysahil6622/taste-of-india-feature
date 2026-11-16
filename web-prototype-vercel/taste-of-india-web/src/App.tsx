@@ -10,7 +10,7 @@ import {
   type RefObject,
 } from "react";
 import MapArtwork from "./MapArtwork";
-import { SAFE_TOP, closeOwnlyScreen } from "./ownlyHost";
+import { closeOwnlyScreen } from "./ownlyHost";
 import handTapImage from "./assets/hand-tap.webp";
 
 // Images live in src/assets/, so the build gives each one a URL with a hash of its content (e.g.
@@ -318,8 +318,6 @@ const MAX_FIT_SCALE = 1.6;
 // Selected-state zoom, multiplied on top of the fit scale (capped so no label is clipped).
 const FOCUS_SCALE = 1.03;
 const FOCUS_BOTTOM_GAP = 96;
-// Height of the fixed white header, including the status bar inset (must match .map-header in index.css).
-const HEADER_HEIGHT = 108 + SAFE_TOP;
 const DRAG_THRESHOLD = 8;
 const PAN_EDGE_MARGIN = 100;
 const MAX_VERTICAL_DRAG = 80;
@@ -333,8 +331,9 @@ function computeWidthFit(width: number) {
 }
 
 // Scale at which the markers + labels fill the width and the map fits between the header and the tip.
-function computeFitScale(width: number, height: number, tipHeight: number) {
-  const availableHeight = height - tipHeight - HEADER_HEIGHT - 2 * FIT_GAP_Y;
+// headerHeight: the fixed white header's measured height (status bar inset included).
+function computeFitScale(width: number, height: number, tipHeight: number, headerHeight: number) {
+  const availableHeight = height - tipHeight - headerHeight - 2 * FIT_GAP_Y;
   return Math.max(
     0.1,
     Math.min(MAX_FIT_SCALE, computeWidthFit(width), availableHeight / (CONTENT_BOUNDS.bottom - CONTENT_BOUNDS.top)),
@@ -347,36 +346,45 @@ function computeMapFocus(
   obstruction: number,
   tipHeight: number,
   anchor: { x: number; y: number } | null,
+  headerHeight: number,
 ): MapFocus {
-  const fit = computeFitScale(width, height, tipHeight);
+  const fit = computeFitScale(width, height, tipHeight, headerHeight);
   if (!anchor) {
     // Default view: content centred in the area between the header and the discovery tip.
     const visibleBottom = height - tipHeight;
     return {
       scale: fit,
       x: width / 2 - fit * MARKER_CENTER_X,
-      y: (HEADER_HEIGHT + visibleBottom) / 2 - fit * CONTENT_CENTER_Y,
+      y: (headerHeight + visibleBottom) / 2 - fit * CONTENT_CENTER_Y,
     };
   }
   // Same for every state: zoom on top of the fit, keeping every label inside the side margins.
   const scale = Math.min(fit * FOCUS_SCALE, Math.max(fit, computeWidthFit(width)));
   const visibleBottom = height - obstruction;
-  const maxY = HEADER_HEIGHT + FIT_GAP_Y - scale * CONTENT_BOUNDS.top;
+  const maxY = headerHeight + FIT_GAP_Y - scale * CONTENT_BOUNDS.top;
   const minY = visibleBottom - FOCUS_BOTTOM_GAP - scale * CONTENT_BOUNDS.bottom;
   return {
     scale,
     // X is the same for every state (and matches the default view), so the map only moves vertically.
     x: width / 2 - scale * MARKER_CENTER_X,
-    y: Math.min(maxY, Math.max(minY, (HEADER_HEIGHT + visibleBottom) / 2 - scale * anchor.y)),
+    y: Math.min(maxY, Math.max(minY, (headerHeight + visibleBottom) / 2 - scale * anchor.y)),
   };
 }
 
-function computeMapPanBounds(height: number, obstruction: number, scale: number, restX: number, restY: number, locked: boolean) {
+function computeMapPanBounds(
+  height: number,
+  obstruction: number,
+  scale: number,
+  restX: number,
+  restY: number,
+  locked: boolean,
+  headerHeight: number,
+) {
   // No state selected: the map can't be dragged at all.
   if (locked) return { minX: restX, maxX: restX, minY: restY, maxY: restY };
   const visibleBottom = height - obstruction;
   const markerYs = states.map((item) => item.marker.y);
-  const markerMinY = HEADER_HEIGHT + PAN_EDGE_MARGIN - scale * Math.max(...markerYs);
+  const markerMinY = headerHeight + PAN_EDGE_MARGIN - scale * Math.max(...markerYs);
   const markerMaxY = visibleBottom - PAN_EDGE_MARGIN - scale * Math.min(...markerYs);
   // Use whichever limit is tighter: the marker limits or MAX_VERTICAL_DRAG from rest.
   let minY = Math.max(markerMinY, restY - MAX_VERTICAL_DRAG);
@@ -723,7 +731,7 @@ function RestaurantCard() {
 /** Arrow used by both back buttons (map header and dish detail). */
 function BackIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M19 12H5" />
       <path d="M12 19l-7-7 7-7" />
     </svg>
@@ -785,6 +793,8 @@ export default function App() {
     setTipHeight(height);
   }, []);
   const shellRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
   const [shellSize, setShellSize] = useState({ width: Math.min(window.innerWidth, 430), height: window.innerHeight });
   const [pan, setPan] = useState({ x: 0, y: 0 }); // pan.x stays 0: vertical drag only
   const [dragging, setDragging] = useState(false);
@@ -799,10 +809,12 @@ export default function App() {
       setShellSize((current) =>
         current.width === rect.width && current.height === rect.height ? current : { width: rect.width, height: rect.height },
       );
+      setHeaderHeight(headerRef.current?.offsetHeight ?? 0);
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(shell);
+    if (headerRef.current) observer.observe(headerRef.current);
     return () => observer.disconnect();
   }, []);
 
@@ -866,8 +878,15 @@ export default function App() {
     return () => window.removeEventListener("keydown", close);
   }, [detail, closeDish]);
 
-  const focus = computeMapFocus(shellSize.width, shellSize.height, obstruction, tipHeight, selected ? selected.marker : null);
-  const bounds = computeMapPanBounds(shellSize.height, obstruction, focus.scale, focus.x, focus.y, !selected);
+  const focus = computeMapFocus(
+    shellSize.width,
+    shellSize.height,
+    obstruction,
+    tipHeight,
+    selected ? selected.marker : null,
+    headerHeight,
+  );
+  const bounds = computeMapPanBounds(shellSize.height, obstruction, focus.scale, focus.x, focus.y, !selected, headerHeight);
   const worldX = focus.x; // fixed for every state; bounds.minX === bounds.maxX
   const worldY = clamp(focus.y + pan.y, bounds.minY, bounds.maxY);
   const worldTransform = `translate(${worldX}px, ${worldY}px) scale(${focus.scale})`;
@@ -956,7 +975,7 @@ export default function App() {
         </div>
       </div>
 
-      <header className="map-header">
+      <header ref={headerRef} className="map-header">
         <button
           className="back-button"
           onClick={() => {
