@@ -93,11 +93,33 @@ function getCardImage(dish: Dish, state: StateData): CardImage {
   return { src: dish.banner, style: placeCardImage({ width: state.bannerWidth, height: BANNER_HEIGHT }, window, FALLBACK_BOX) };
 }
 
-// Cut-outs are picked up by file name: src/assets/cutouts/<slug>.webp (or .png), where the slug is the
-// dish name in lowercase with "&" removed and spaces turned into hyphens ("Dal Makhni" → dal-makhni).
+// Cut-outs are picked up by file name: src/assets/cutouts/<slug>.webp (or .png). The same slug is used
+// for the Ownly app's search deep link: lowercase, spaces → hyphens, every other character removed
+// ("Dal Makhni" → dal-makhni, "Puttu & Kadala Curry" → puttu-kadala-curry).
 
 function dishSlug(name: string) {
-  return name.toLowerCase().replace(/&/g, "").trim().replace(/\s+/g, "-");
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+declare global {
+  interface Window {
+    ReactNativeWebView?: unknown;
+  }
+}
+
+/** True when this page runs inside the Ownly app's React Native WebView. */
+function isInOwnlyApp() {
+  return typeof window !== "undefined" && !!window.ReactNativeWebView;
+}
+
+/** Deep link the Ownly app intercepts to open its native search results for a dish. */
+function ownlyDishSearchUrl(dish: Dish) {
+  return `ownlyapp://search/${dishSlug(dish.name)}?entityType=UNIVERSAL_DISH&entityName=${encodeURIComponent(dish.name)}&cityId=current`;
 }
 
 function withCutout(dish: Dish): Dish {
@@ -806,9 +828,16 @@ export default function App() {
     preloadBanners(state);
   };
 
-  // The detail page opens as a new history entry, so the browser back button closes it too.
-  // The map screen stays mounted underneath, so the selected state, sheet and card scroll are kept.
+  // Inside the Ownly app, a dish tap opens the app's native search results: a real navigation to
+  // ownlyapp://…, which the WebView intercepts (client-side routing would never reach the app).
+  // In a normal browser, the detail page opens as a new history entry, so the browser back button
+  // closes it too. The map screen stays mounted underneath, so the selected state, sheet and card
+  // scroll are kept.
   const openDish = (dish: Dish) => {
+    if (isInOwnlyApp()) {
+      window.location.href = ownlyDishSearchUrl(dish);
+      return;
+    }
     setDetail({ dish });
     window.history.pushState({ tasteOfIndiaDetail: true }, "");
   };
