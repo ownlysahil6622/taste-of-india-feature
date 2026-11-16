@@ -14,14 +14,21 @@ declare global {
   }
 }
 
-// Read once at startup (this module is imported before the app renders). The app's inset
-// (in CSS px) wins when larger; env() covers iOS Safari and other browsers with notches.
-const inset: SafeArea = window.OwnlyHost?.safeArea ?? { top: 0, right: 0, bottom: 0, left: 0 };
+// Read once at startup (this module is imported before the app renders).
 const root = document.documentElement.style;
-// Scopes the app-only CSS rules (html.in-app …) so the normal browser layout is unchanged.
-if (window.OwnlyHost) document.documentElement.classList.add("in-app");
-root.setProperty("--safe-top", `max(${inset.top}px, env(safe-area-inset-top, 0px))`);
-root.setProperty("--safe-bottom", `max(${inset.bottom}px, env(safe-area-inset-bottom, 0px))`);
+if (window.OwnlyHost) {
+  // In the app, the insets come only from the app (CSS px). env() is ignored: the Android WebView
+  // reports the navigation bar there even though the app already sits above it.
+  const inset: SafeArea = window.OwnlyHost.safeArea ?? { top: 0, right: 0, bottom: 0, left: 0 };
+  // Scopes the app-only CSS rules (html.in-app …) so the normal browser layout is unchanged.
+  document.documentElement.classList.add("in-app");
+  root.setProperty("--safe-top", `${inset.top}px`);
+  root.setProperty("--safe-bottom", `${inset.bottom}px`);
+} else {
+  // Normal browser: env() covers iOS Safari and other browsers with notches.
+  root.setProperty("--safe-top", "max(0px, env(safe-area-inset-top, 0px))");
+  root.setProperty("--safe-bottom", "max(0px, env(safe-area-inset-bottom, 0px))");
+}
 
 /** Closes the app screen when running inside the Ownly app. Returns false in a normal browser. */
 export function closeOwnlyScreen() {
