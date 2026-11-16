@@ -10,6 +10,7 @@ import {
   type RefObject,
 } from "react";
 import MapArtwork from "./MapArtwork";
+import { SAFE_TOP, closeOwnlyScreen } from "./ownlyHost";
 import handTapImage from "./assets/hand-tap.webp";
 
 // Images live in src/assets/, so the build gives each one a URL with a hash of its content (e.g.
@@ -317,8 +318,8 @@ const MAX_FIT_SCALE = 1.6;
 // Selected-state zoom, multiplied on top of the fit scale (capped so no label is clipped).
 const FOCUS_SCALE = 1.03;
 const FOCUS_BOTTOM_GAP = 96;
-// Height of the fixed white header (must match .map-header in index.css).
-const HEADER_HEIGHT = 108;
+// Height of the fixed white header, including the status bar inset (must match .map-header in index.css).
+const HEADER_HEIGHT = 108 + SAFE_TOP;
 const DRAG_THRESHOLD = 8;
 const PAN_EDGE_MARGIN = 100;
 const MAX_VERTICAL_DRAG = 80;
@@ -958,7 +959,12 @@ export default function App() {
       <header className="map-header">
         <button
           className="back-button"
-          onClick={() => selected && setSelected(null)}
+          onClick={() => {
+            // Inner screen (a state's dishes): close it and stay in the site.
+            if (selected) setSelected(null);
+            // Top-level map inside the Ownly app: close the app screen. In a browser this does nothing, as before.
+            else closeOwnlyScreen();
+          }}
           aria-label={selected ? "Close state details" : "Go back"}
         >
           <BackIcon />
